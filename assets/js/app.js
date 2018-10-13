@@ -58,7 +58,6 @@ function fetchComments() {
     commentCount.textContent = '0';
     wordsPerComment.textContent = '0';
 
-    // TODO: Delete all comments on webpage
     query();
 }
 
@@ -125,7 +124,7 @@ function processComments(data) {
         posts.push(post);
     }
 
-    if (processingComments && commentsLoaded < 1000) {
+    if (processingComments && commentsLoaded < 1000 && data.after != null) {
         query(data.after);
     } else {
         if (commentsLoaded >= 1000) {
@@ -135,8 +134,6 @@ function processComments(data) {
         queryStatus.textContent = 'Complete';
         displayPosts();
     }
-
-    calculateWords();
 }
 
 function displayPosts() {
@@ -163,6 +160,8 @@ function displayPosts() {
 
         postsCol.appendChild(commentDiv);
     }
+
+    calculateWords();
 }
 
 function calculateWords() {
@@ -193,7 +192,6 @@ function countWords(str) {
     // Use regular expression to replace things we don't want
     // counted as words with empty spaces, then extract all non-whitespace sequences
     str = str.replace(/[.,?!()<>{}[\]/\\+=~'`|:;0-9-_]/g, '');
-    console.log(str);
     let exp = /\S+/ig;
     let tmp, words = 0;
     while ((tmp = exp.exec(str)) != null) {
