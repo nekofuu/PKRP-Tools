@@ -33,6 +33,7 @@ let postsCol = document.getElementById('posts-col');
 const queryLimit = 50;
 let processingComments = false;
 let tempWordCount = 0;
+let tempCommentCount = 0;
 let commentsLoaded = 0;
 let posts = [];
 
@@ -40,6 +41,31 @@ let posts = [];
 fetchBtn.addEventListener("click", fetchComments);
 username.addEventListener('change', () => {
     usernameHeader.textContent = username.value;
+});
+startDate.addEventListener('change', () => {
+    // Every time the start date is changed, check to see if
+    // the new Start Date is either the 1st or the 15th of a month
+    let start = new Date(startDate.value);
+    let end = new Date(start);
+    let setNewDate = false;
+    if (start.getUTCDate() === 1) {
+        end.setUTCDate(15);
+        setNewDate = true;
+    }
+    // If it is, change the End Date to either the 15th of the
+    // same month or the first of the next month respectively.
+    if (start.getUTCDate() === 15) {
+        end.setUTCMonth(start.getUTCMonth() + 1, 1)
+        setNewDate = true;
+    }
+
+    if (setNewDate) {
+        let year = end.getUTCFullYear();
+        let month = (`0${end.getUTCMonth() + 1}`).slice(-2);
+        let day = (`0${end.getUTCDate()}`).slice(-2);
+        let endString = `${year}-${month}-${day}`;
+        endDate.value = endString;
+    }
 });
 
 function logError(message) {
@@ -132,6 +158,7 @@ function processComments(data) {
         }
 
         queryStatus.textContent = 'Complete';
+        commentCount.textContent = posts.length;
         displayPosts();
     }
 }
@@ -167,10 +194,21 @@ function displayPosts() {
 function calculateWords() {
     // Iterate through each comment from postsCol and get word count
     let comments = Array.from(postsCol.querySelectorAll('.comment-body'));
-    commentCount.textContent = comments.length;
 
     for (let i in comments) {
-        tempWordCount += countWords(comments[i].textContent);
+        let commentElements = Array.from(comments[i].children[0].children);
+        for (let element in commentElements) {
+            // Check each element and only count the words within
+            // the element if it isn't a blockquote, table, or list
+            if (commentElements[element].tagName.toLowerCase() != 'blockquote' &&
+                commentElements[element].tagName.toLowerCase() != 'table' &&
+                commentElements[element].tagName.toLowerCase() != 'code' &&
+                commentElements[element].tagName.toLowerCase() != 'ul' &&
+                commentElements[element].tagName.toLowerCase() != 'ol')
+            {
+                tempWordCount += countWords(commentElements[element].textContent);
+            }
+        }
     }
 
     wordCount.textContent = tempWordCount;
