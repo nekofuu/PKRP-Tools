@@ -166,7 +166,7 @@ body {
     margin-bottom: 10px;
 }
 
-#error-msg {
+.error-msg {
     color: #c00;
     display: none;
 }

@@ -8,6 +8,8 @@ let endDate = document.getElementById('end-date');
 let queryStatus = document.getElementById('query-status');
 // Fetch Button
 let fetchBtn = document.getElementById('fetch-btn');
+// Fetch error message
+let fetchErrorMsg = document.getElementById('fetch-error-msg');
 // Small Calculations
 let wordCount = document.getElementById('word-count');
 let commentCount = document.getElementById('comment-count');
@@ -22,15 +24,15 @@ let earnedSplit = document.getElementById('earned-split');
 let newStats = document.getElementById('new-stats');
 // Calculate Button
 let calcBtn = document.getElementById('calc-btn');
-// Error Message
-let errorMsg = document.getElementById('error-msg');
+// Stats Error Message
+let statsErrorMsg = document.getElementById('stats-error-msg');
 // Username Header
 let usernameHeader = document.getElementById('username-header');
 // Posts Column
 let postsCol = document.getElementById('posts-col');
 
 // Global Variables
-const queryLimit = 50;
+const QUERY_LIMIT = 50;
 let processingComments = false;
 let tempWordCount = 0;
 let tempCommentCount = 0;
@@ -68,9 +70,9 @@ startDate.addEventListener('change', () => {
     }
 });
 
-function logError(message) {
-    errorMsg.textContent = message;
-    errorMsg.classList.add('show');
+function logError(element, message) {
+    element.textContent = message;
+    element.classList.add('show');
 }
 
 function fetchComments() {
@@ -84,17 +86,21 @@ function fetchComments() {
     commentCount.textContent = '0';
     wordsPerComment.textContent = '0';
 
+    // Clear stat values since the new comments are
+    // potentially unrelated to the old ones
+    resetStatValues();
+
     query();
 }
 
 function query(after = '') {
-    errorMsg.classList.remove('show');
+    fetchErrorMsg.classList.remove('show');
 
-    const url = `https://api.reddit.com/user/${username.value}/comments/.json?limit=${queryLimit}&?&after=${after}`;
+    const url = `https://api.reddit.com/user/${username.value}/comments/.json?limit=${QUERY_LIMIT}&?&after=${after}`;
     let request = new XMLHttpRequest();
     
     request.ontimeout = () => {
-        logError(`Error - Timed Out while Querying`);
+        logError(fetchErrorMsg, `Error - Timed Out while Querying`);
     };
 
     request.open('GET', url);
@@ -108,7 +114,7 @@ function query(after = '') {
         if (request.readyState == XMLHttpRequest.DONE) {
             let response = JSON.parse(request.response);
             if (response.error) {
-                logError(`Error Querying Username ${username.value} - ${response.error}: ${response.message}`);
+                logError(fetchErrorMsg, `Error Querying Username ${username.value} - ${response.error}: ${response.message}`);
             }
             //console.log(response.data.children);
             if (response.data) {
@@ -154,7 +160,7 @@ function processComments(data) {
         query(data.after);
     } else {
         if (commentsLoaded >= 1000) {
-            logError(`Max Comments Loaded - Due to limitations set by Reddit, only the last 1000 comments from a user can be loaded`);
+            logError(fetchErrorMsg, `Max Comments Loaded - Due to limitations set by Reddit, only the last 1000 comments from a user can be loaded`);
         }
 
         queryStatus.textContent = 'Complete';
@@ -192,27 +198,29 @@ function displayPosts() {
 }
 
 function calculateWords() {
-    // Iterate through each comment from postsCol and get word count
-    let comments = Array.from(postsCol.querySelectorAll('.comment-body'));
+    if (posts.length) {
+        // Iterate through each comment from postsCol and get word count
+        let comments = Array.from(postsCol.querySelectorAll('.comment-body'));
 
-    for (let i in comments) {
-        let commentElements = Array.from(comments[i].children[0].children);
-        for (let element in commentElements) {
-            // Check each element and only count the words within
-            // the element if it isn't a blockquote, table, or list
-            if (commentElements[element].tagName.toLowerCase() != 'blockquote' &&
-                commentElements[element].tagName.toLowerCase() != 'table' &&
-                commentElements[element].tagName.toLowerCase() != 'code' &&
-                commentElements[element].tagName.toLowerCase() != 'ul' &&
-                commentElements[element].tagName.toLowerCase() != 'ol')
-            {
-                tempWordCount += countWords(commentElements[element].textContent);
+        for (let i in comments) {
+            let commentElements = Array.from(comments[i].children[0].children);
+            for (let element in commentElements) {
+                // Check each element and only count the words within
+                // the element if it isn't a blockquote, table, or list
+                if (commentElements[element].tagName.toLowerCase() != 'blockquote' &&
+                    commentElements[element].tagName.toLowerCase() != 'table' &&
+                    commentElements[element].tagName.toLowerCase() != 'code' &&
+                    commentElements[element].tagName.toLowerCase() != 'ul' &&
+                    commentElements[element].tagName.toLowerCase() != 'ol')
+                {
+                    tempWordCount += countWords(commentElements[element].textContent);
+                }
             }
         }
-    }
 
-    wordCount.textContent = tempWordCount;
-    wordsPerComment.textContent = round(tempWordCount / comments.length, 1);
+        wordCount.textContent = tempWordCount;
+        wordsPerComment.textContent = round(tempWordCount / comments.length, 1);
+    }
 }
 
 function decodeHTML(html) {
@@ -237,4 +245,519 @@ function countWords(str) {
     }
 
     return words;
+}
+
+/*
+ *
+ * STAT CALCULATIONS
+ * 
+ */
+
+ // Object to hold the different thresholds at different base values
+ var baseLevels = {
+    //threshold = levelTable.low
+    base_0: [
+    { //1
+        threshold: 0,
+        percent: 1.0
+    },
+    { //2
+        threshold: 101,
+        percent: 0.85
+    },
+    { //3
+        threshold: 151,
+        percent: 0.70
+    },
+    { //4
+        threshold: 201,
+        percent: 0.55
+    },
+    { //5
+        threshold: 251,
+        percent: 0.40
+    }], //DONE
+    
+    base_1: [
+    { //1
+        threshold: 0,
+        percent: 2.0
+    },
+    { //2
+        threshold: 301,
+        percent: 1.0
+    },
+    { //3
+        threshold: 351,
+        percent: 0.85
+    },
+    { //4
+        threshold: 401,
+        percent: 0.70
+    },
+    { //5
+        threshold: 451,
+        percent: 0.55
+    },
+    { //6
+        threshold: 501,
+        percent: 0.40
+    }], //DONE
+    
+    base_2: [
+    { //1
+        threshold: 0,
+        percent: 3.0
+    },
+    { //2
+        threshold: 351,
+        percent: 2.0
+    },
+    { //3
+        threshold: 551,
+        percent: 1.0
+    },
+    { //4
+        threshold: 601,
+        percent: 0.85
+    },
+    { //5
+        threshold: 651,
+        percent: 0.70
+    },
+    { //6
+        threshold: 700,
+        percent: 0.55
+    },
+    { //7
+        threshold: 751,
+        percent: 0.40
+    }], //DONE
+    
+    base_3: [
+    { //1
+        threshold: 0,
+        percent: 4.0
+    },
+    { //2
+        threshold: 401,
+        percent: 3.0
+    },
+    { //3
+        threshold: 601,
+        percent: 2.0
+    },
+    { //4
+        threshold: 801,
+        percent: 1.0
+    },
+    { //5
+        threshold: 851,
+        percent: 0.85
+    },
+    { //6
+        threshold: 901,
+        percent: 0.70
+    },
+    { //7
+        threshold: 951,
+        percent: 0.55
+    },
+    { //8
+        threshold: 1001,
+        percent: 0.40
+    }], //DONE
+        
+    base_4: [
+    { //1
+        threshold: 0,
+        percent: 5.0
+    },
+    { //2
+        threshold: 351,
+        percent: 4.0
+    },
+    { //3
+        threshold: 651,
+        percent: 3.0
+    },
+    { //4
+        threshold: 851,
+        percent: 2.0
+    },
+    { //5
+        threshold: 1051,
+        percent: 1.0
+    },
+    { //6
+        threshold: 1101,
+        percent: 0.85
+    },
+    { //7
+        threshold: 1151,
+        percent: 0.70
+    },
+    { //8
+        threshold: 1201,
+        percent: 0.55
+    },
+    { //9
+        threshold: 1251,
+        percent: 0.40
+    }], //DONE
+    
+    base_5: [
+    { //1
+        threshold: 0,
+        percent: 6.0
+    },
+    { //2
+        threshold: 351,
+        percent: 5.0
+    },
+    { //3
+        threshold: 601,
+        percent: 4.0
+    },
+    { //4
+        threshold: 801,
+        percent: 3.0
+    },
+    { //5
+        threshold: 1051,
+        percent: 2.0
+    },
+    { //6
+        threshold: 1301,
+        percent: 1.0
+    },
+    { //7
+        threshold: 1351,
+        percent: 0.85
+    },
+    { //8
+        threshold: 1401,
+        percent: 0.70
+    },
+    { //9
+        threshold: 1451,
+        percent: 0.55
+    },
+    { //10
+        threshold: 1501,
+        percent: 0.40
+    }], //DONE
+    
+    base_6: [
+    { //1
+        threshold: 0,
+        percent: 7.0
+    },
+    { //2
+        threshold: 301,
+        percent: 6.0
+    },
+    { //3
+        threshold: 551,
+        percent: 5.0
+    },
+    { //4
+        threshold: 801,
+        percent: 4.0
+    },
+    { //5
+        threshold: 1051,
+        percent: 3.0
+    },
+    { //6
+        threshold: 1301,
+        percent: 2.0
+    },
+    { //7
+        threshold: 1551,
+        percent: 1.0
+    },
+    { //8
+        threshold: 1601,
+        percent: 0.85
+    },
+    { //9
+        threshold: 1651,
+        percent: 0.70
+    },
+    { //10
+        threshold: 1701,
+        percent: 0.55
+    },
+    { //11
+        threshold: 1751,
+        percent: 0.40
+    }], //DONE
+    
+    base_7: [
+    { //1
+        threshold: 0,
+        percent: 8.0
+    },
+    { //2
+        threshold: 301,
+        percent: 7.0
+    },
+    { //3
+        threshold: 551,
+        percent: 6.0
+    },
+    { //4
+        threshold: 801,
+        percent: 5.0
+    },
+    { //5
+        threshold: 1051,
+        percent: 4.0
+    },
+    { //6
+        threshold: 1301,
+        percent: 3.0
+    },
+    { //7
+        threshold: 1551,
+        percent: 2.0
+    },
+    { //8
+        threshold: 1801,
+        percent: 1.0
+    },
+    { //9
+        threshold: 1851,
+        percent: 0.85
+    },
+    { //10
+        threshold: 1901,
+        percent: 0.70
+    },
+    { //11
+        threshold: 1951,
+        percent: 0.55
+    },
+    { //12
+        threshold: 2001,
+        percent: 0.40
+    }], //DONE
+    
+    base_8: [
+    { //1
+        threshold: 0,
+        percent: 9.0
+    },
+    { //2
+        threshold: 301,
+        percent: 8.0
+    },
+    { //3
+        threshold: 551,
+        percent: 7.0
+    },
+    { //4
+        threshold: 801,
+        percent: 6.0
+    },
+    { //5
+        threshold: 1051,
+        percent: 5.0
+    },
+    { //6
+        threshold: 1301,
+        percent: 4.0
+    },
+    { //7
+        threshold: 1551,
+        percent: 3.0
+    },
+    { //8
+        threshold: 1801,
+        percent: 2.0
+    },
+    { //9
+        threshold: 2051,
+        percent: 1.0
+    },
+    { //10
+        threshold: 2101,
+        percent: 0.85
+    },
+    { //11
+        threshold: 2151,
+        percent: 0.70
+    },
+    { //12
+        threshold: 2201,
+        percent: 0.55
+    },
+    { //13
+        threshold: 2251,
+        percent: 0.40
+    }], //DONE
+    
+    base_9: [
+    { //1
+        threshold: 0,
+        percent: 10.0
+    },
+    { //2
+        threshold: 301,
+        percent: 9.0
+    },
+    { //3
+        threshold: 551,
+        percent: 8.0
+    },
+    { //4
+        threshold: 801,
+        percent: 7.0
+    },
+    { //5
+        threshold: 1051,
+        percent: 6.0
+    },
+    { //6
+        threshold: 1301,
+        percent: 5.0
+    },
+    { //7
+        threshold: 1551,
+        percent: 4.0
+    },
+    { //8
+        threshold: 1801,
+        percent: 3.0
+    },
+    { //9
+        threshold: 2051,
+        percent: 2.0
+    },
+    { //10
+        threshold: 2301,
+        percent: 1.0
+    },
+    { //11
+        threshold: 2351,
+        percent: 0.85
+    },
+    { //12
+        threshold: 2401,
+        percent: 0.70
+    },
+    { //13
+        threshold: 2451,
+        percent: 0.55
+    }]  //DONE
+};
+
+const MAX_SCORE = 50;
+let tempScore = 0;
+
+calcBtn.addEventListener('click', () => {
+    // Whenever the Calculate Stats button is pressed
+    // Clear error message
+    statsErrorMsg.classList.remove('show');
+
+    if (Math.round(tempWordCount / 100) > MAX_SCORE) {
+        tempScore = MAX_SCORE;
+    } else {
+        tempScore = Math.round(tempWordCount / 100);
+    }
+    score.textContent = tempScore;
+
+    let rangeLevel = 0;
+    let baseArray = baseLevels[baseLevel.value];
+    let baseRangeMin = baseArray[Object.keys(baseArray).length - 1].threshold;
+    let baseRangeMax = baseRangeMin + 49;
+    let percent;
+    let isBaseValid, isBottomRange;
+    let tempStatsEarned = 0;
+
+    if (currentStats.valueAsNumber > baseRangeMax) {
+        isBaseValid = false;
+        logError(statsErrorMsg, 'Current Stat Total outside of Base Range!');
+        return;
+    } else {
+        isBaseValid = true;
+    }
+
+    // If the current stat total is outside of the range, set the rangeLevel
+    // to the size of the array
+    if (currentStats.valueAsNumber >= baseRangeMin) {
+        rangeLevel = Object.keys(baseArray).length - 1;
+    } else {
+        // Iterate through the baseArray to find what rangeLevel we're at
+        for (let lvl in baseArray) {
+            lvl = Number(lvl);
+            if (currentStats.valueAsNumber >= baseArray[lvl].threshold &&
+                currentStats.valueAsNumber < baseArray[lvl+1].threshold) {
+                rangeLevel = lvl;
+                break;
+            }
+        }
+    }
+
+    while (tempScore > 0) {
+        percent = baseArray[rangeLevel].percent;
+
+        if (rangeLevel === (Object.keys(baseArray).length - 1)) {
+            isBottomRange = true;
+        } else {
+            isBottomRange = false;
+        }
+
+        let temp = roundStats(tempScore * percent);
+        let statsNeeded = 0;
+        if (isBottomRange) {
+            statsNeeded = roundStats(baseRangeMax - currentStats.valueAsNumber);
+            if (temp > statsNeeded) {
+                logError(statsErrorMsg, 'You need to Base Up!');
+                return;
+            }
+        } else {
+            statsNeeded = (baseArray[rangeLevel+1].threshold - 1) - currentStats.valueAsNumber;
+        }
+
+        if (temp > statsNeeded) {
+            let tmp = roundStats(statsNeeded / percent);
+            score -= tmp;
+            tempStatsEarned += statsNeeded;
+            rangeLevel++;
+        } else {
+            tempStatsEarned += temp;
+            tempScore = 0;
+        }
+    }
+
+    earnedStats.textContent = tempStatsEarned;
+    earnedSplit.textContent = `(${roundStats(tempStatsEarned * 0.6)}/${roundStats(tempStatsEarned * 0.4)})`;
+    newStats.textContent = currentStats.valueAsNumber + tempStatsEarned;
+});
+
+function roundStats(value) {
+    if (Math.floor(value) + 0.50 < value) {
+        value = Math.round(value);
+    } else {
+        value = Math.floor(value);
+    }
+
+    return value;
+}
+
+Object.size = function(obj) {
+    var size = 0, key;
+    for (key in obj) {
+        if (obj.hasOwnProperty(key)) size++;
+    }
+    return size;
+};
+
+function resetStatValues() {
+    score.textContent = '0';
+    earnedStats.textContent = '0';
+    earnedSplit.textContent = '(0/0)';
+    newStats.textContent = '0';
 }
