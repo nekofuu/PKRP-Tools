@@ -654,6 +654,9 @@ function countWords(str) {
 };
 
 const MAX_SCORE = 50;
+const WORD_REQUIREMENT = 200;
+const WORDS_PER_POINT = 170;
+const BASE_SCORE = 20;
 let tempScore = 0;
 
 calcBtn.addEventListener('click', () => {
@@ -661,11 +664,15 @@ calcBtn.addEventListener('click', () => {
     // Clear error message
     statsErrorMsg.classList.remove('show');
 
-    if (Math.round(tempWordCount / 100) > MAX_SCORE) {
-        tempScore = MAX_SCORE;
-    } else {
-        tempScore = Math.round(tempWordCount / 100);
+    // If the player has written enough words to equal WORD_REQUIREMENT
+    // then they get at least 20 points
+    if (tempWordCount > 200) {
+        tempScore = BASE_SCORE + Math.round(tempWordCount / WORDS_PER_POINT);
+        if (tempScore > MAX_SCORE) {
+            tempScore = MAX_SCORE;
+        }
     }
+
     score.textContent = tempScore;
 
     let rangeLevel = 0;
