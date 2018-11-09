@@ -141,9 +141,9 @@ function processComments(data) {
         // Check if comment was made in the correct subreddit
         // and if it was made later than end-date
         // if so, continue to next comment
-        if (data.children[comment].data.subreddit.localeCompare(subreddit.value, 'en', {sensitivity: 'base'}) ||
+        if (data.children[comment].data.subreddit.localeCompare(subreddit.value, 'en', {sensitivity: 'base'}) !== 0 ||
             data.children[comment].data.created_utc > (endDate.valueAsNumber / 1000) + 43200) {
-            if (subreddit.value.localeCompare('StrawHatRPG', 'en', {sensitivity: 'base'}) == 0) {
+            if (subreddit.value.localeCompare('StrawHatRPG', 'en', {sensitivity: 'base'}) === 0) {
                 // If the subreddit is set to StrawHatRPG, then it checks if the comment was made in
                 // any of the subs within the StrawHatRPG Community
                 if (data.children[comment].data.subreddit.localeCompare('StrawHatRPGShops', 'en', {sensitivity: 'base'}) == 0) {
@@ -161,7 +161,7 @@ function processComments(data) {
         // Now it will be added to the posts array
         let post = {};
         post.postedTo = data.children[comment].data.link_title;
-        post.postedToLink = data.children[comment].data.link_permalink;
+        post.postedToLink = `http://reddit.com${data.children[comment].data.permalink}`;
         post.body = data.children[comment].data.body_html;
         posts.push(post);
     }
