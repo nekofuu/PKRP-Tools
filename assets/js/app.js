@@ -130,6 +130,7 @@ function query(after = '') {
 
 function processComments(data) {
     for (let comment in data.children) {
+        let keep = false;
         // Make sure comment is not older than start date
         // If it isn't, end processing
         if (data.children[comment].data.created_utc < (startDate.valueAsNumber / 1000) + 43200) {
@@ -142,7 +143,16 @@ function processComments(data) {
         // if so, continue to next comment
         if (data.children[comment].data.subreddit.localeCompare(subreddit.value, 'en', {sensitivity: 'base'}) ||
             data.children[comment].data.created_utc > (endDate.valueAsNumber / 1000) + 43200) {
-            continue;
+            if (subreddit.value.localeCompare('StrawHatRPG', 'en', {sensitivity: 'base'}) == 0) {
+                // If the subreddit is set to StrawHatRPG, then it checks if the comment was made in
+                // any of the subs within the StrawHatRPG Community
+                if (data.children[comment].data.subreddit.localeCompare('StrawHatRPGShops', 'en', {sensitivity: 'base'}) == 0) {
+                    keep = true;
+                } 
+            }
+            if (!keep) {
+                continue;
+            }
         }
 
         //console.log(data.children[comment]);
