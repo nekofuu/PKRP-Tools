@@ -665,7 +665,7 @@ function countWords(str) {
 
 const MAX_SCORE = 50;
 const MIN_SCORE = 20;
-const WORD_REQUIREMENT = 200;
+const WORD_REQUIREMENT = 100;
 const WORDS_PER_POINT = 170;
 let tempScore = 0;
 
@@ -676,7 +676,7 @@ calcBtn.addEventListener('click', () => {
 
     // Get a temporary score by dividing word count by WORDS_PER_POINT
     tempScore = Math.round(tempWordCount / WORDS_PER_POINT);
-    // If the player has written at least 200 words, they can get the minimum score of 20
+    // If the player has written at least 100 words, they can get the minimum score of 20
     if (tempWordCount >= WORD_REQUIREMENT) {
         // Calculate Score
         tempScore = MIN_SCORE + Math.round(tempWordCount / WORDS_PER_POINT);
