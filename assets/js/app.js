@@ -229,7 +229,7 @@ function calculateWords() {
         }
 
         wordCount.textContent = tempWordCount;
-        wordsPerComment.textContent = round(tempWordCount / comments.length, 1);
+        wordsPerComment.textContent = (tempWordCount / comments.length).toFixed(1);
     }
 }
 
@@ -237,11 +237,6 @@ function decodeHTML(html) {
     let txt = document.createElement('textarea');
     txt.innerHTML = html;
     return txt.value;
-}
-
-function round(value, precision) {
-    var multiplier = Math.pow(10, precision || 0);
-    return Math.round(value * multiplier) / multiplier;
 }
 
 function countWords(str) {
@@ -732,10 +727,10 @@ calcBtn.addEventListener('click', () => {
             isBottomRange = false;
         }
 
-        let temp = roundStats(tempScore * percent);
+        let temp = Math.round(tempScore * percent);
         let statsNeeded = 0;
         if (isBottomRange) {
-            statsNeeded = roundStats(baseRangeMax - currentStats.valueAsNumber);
+            statsNeeded = Math.round(baseRangeMax - currentStats.valueAsNumber);
             if (temp > statsNeeded) {
                 logError(statsErrorMsg, 'You need to Base Up!');
                 return;
@@ -745,7 +740,7 @@ calcBtn.addEventListener('click', () => {
         }
 
         if (temp > statsNeeded) {
-            let tmp = roundStats(statsNeeded / percent);
+            let tmp = Math.round(statsNeeded / percent);
             score -= tmp;
             tempStatsEarned += statsNeeded;
             rangeLevel++;
@@ -756,19 +751,9 @@ calcBtn.addEventListener('click', () => {
     }
 
     earnedStats.textContent = tempStatsEarned;
-    earnedSplit.textContent = `(${roundStats(tempStatsEarned * 0.6)}/${roundStats(tempStatsEarned * 0.4)})`;
+    earnedSplit.textContent = `(${Math.round(tempStatsEarned * 0.6)}/${Math.round(tempStatsEarned * 0.4)})`;
     newStats.textContent = currentStats.valueAsNumber + tempStatsEarned;
 });
-
-function roundStats(value) {
-    if (Math.floor(value) + 0.50 < value) {
-        value = Math.round(value);
-    } else {
-        value = Math.floor(value);
-    }
-
-    return value;
-}
 
 Object.size = function(obj) {
     var size = 0, key;
