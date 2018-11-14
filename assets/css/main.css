@@ -158,8 +158,12 @@ body {
     color: #cecece;
 }
 
-#controls button:hover {
+#controls button:hover:enabled {
     background-color: #345fbb
+}
+
+#controls button:disabled, #controls button:hover:disabled {
+    background-color:#565656;
 }
 
 #calc-btn {
