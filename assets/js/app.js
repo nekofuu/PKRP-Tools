@@ -11,9 +11,9 @@ let fetchBtn = document.getElementById('fetch-btn');
 // Fetch error message
 let fetchErrorMsg = document.getElementById('fetch-error-msg');
 // Small Calculations
-let wordCount = document.getElementById('word-count');
-let commentCount = document.getElementById('comment-count');
-let wordsPerComment = document.getElementById('words-per-comment');
+//let wordCount = document.getElementById('word-count');
+//let commentCount = document.getElementById('comment-count');
+//let wordsPerComment = document.getElementById('words-per-comment');
 // Stat Calculation Inputs
 let currentStats = document.getElementById('current-stats');
 let baseLevel = document.getElementById('base-level');
@@ -82,9 +82,9 @@ function fetchComments() {
     tempWordCount = 0;
 
     // Clear select elements
-    wordCount.textContent = '0';
-    commentCount.textContent = '0';
-    wordsPerComment.textContent = '0';
+    //wordCount.textContent = '0';
+    //commentCount.textContent = '0';
+    //wordsPerComment.textContent = '0';
 
     // Clear stat values since the new comments are
     // potentially unrelated to the old ones
@@ -173,8 +173,11 @@ function processComments(data) {
             logError(fetchErrorMsg, `Max Comments Loaded - Due to limitations set by Reddit, only the last 1000 comments from a user can be loaded`);
         }
 
+        // Only enable stat calculation button if comments
+        // are loaded
+        calcBtn.disabled = false;
         queryStatus.textContent = 'Complete';
-        commentCount.textContent = posts.length;
+        //commentCount.textContent = posts.length;
         displayPosts();
     }
 }
@@ -228,8 +231,8 @@ function calculateWords() {
             }
         }
 
-        wordCount.textContent = tempWordCount;
-        wordsPerComment.textContent = (tempWordCount / comments.length).toFixed(1);
+        //wordCount.textContent = tempWordCount;
+        //wordsPerComment.textContent = (tempWordCount / comments.length).toFixed(1);
     }
 }
 
@@ -768,4 +771,5 @@ function resetStatValues() {
     earnedStats.textContent = '0';
     earnedSplit.textContent = '(0/0)';
     newStats.textContent = '0';
+    calcBtn.disabled = true;
 }
