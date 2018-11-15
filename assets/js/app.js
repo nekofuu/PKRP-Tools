@@ -683,7 +683,7 @@ calcBtn.addEventListener('click', () => {
             tempScore = MAX_SCORE;
         }
     } else {
-        logError(statsErrorMsg, 'Player did not write 200 words, 0 points awarded!');
+        logError(statsErrorMsg, 'Player did not write 100 words, 0 points awarded!');
         return;
     }
 
