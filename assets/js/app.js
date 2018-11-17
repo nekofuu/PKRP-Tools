@@ -730,21 +730,21 @@ calcBtn.addEventListener('click', () => {
             isBottomRange = false;
         }
 
-        let temp = Math.round(tempScore * percent);
+        let temp = tempScore * percent; //ROUNDED
         let statsNeeded = 0;
         if (isBottomRange) {
-            statsNeeded = Math.round(baseRangeMax - currentStats.valueAsNumber);
+            statsNeeded = baseRangeMax - currentStats.valueAsNumber; //ROUNDED
             if (temp > statsNeeded) {
                 logError(statsErrorMsg, 'You need to Base Up!');
                 return;
             }
         } else {
-            statsNeeded = (baseArray[rangeLevel+1].threshold - 1) - currentStats.valueAsNumber;
+            statsNeeded = (baseArray[rangeLevel+1].threshold - 1) - (currentStats.valueAsNumber + tempStatsEarned);
         }
 
         if (temp > statsNeeded) {
-            let tmp = Math.round(statsNeeded / percent);
-            score -= tmp;
+            let tmp = (statsNeeded / percent); //ROUNDED
+            tempScore -= tmp;
             tempStatsEarned += statsNeeded;
             rangeLevel++;
         } else {
@@ -753,9 +753,9 @@ calcBtn.addEventListener('click', () => {
         }
     }
 
-    earnedStats.textContent = tempStatsEarned;
+    earnedStats.textContent = Math.round(tempStatsEarned);
     earnedSplit.textContent = `(${Math.round(tempStatsEarned * 0.6)}/${Math.round(tempStatsEarned * 0.4)})`;
-    newStats.textContent = currentStats.valueAsNumber + tempStatsEarned;
+    newStats.textContent = currentStats.valueAsNumber + Math.round(tempStatsEarned);
 });
 
 Object.size = function(obj) {
