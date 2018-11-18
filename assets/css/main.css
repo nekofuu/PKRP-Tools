@@ -169,10 +169,6 @@ body {
     background-color: #345fbb
 }
 
-#controls button:disabled, #controls button:hover:disabled {
-    background-color:#565656;
-}
-
 #calc-btn {
     margin-bottom: 10px;
 }

@@ -191,9 +191,6 @@ function processComments(data) {
             logError(fetchErrorMsg, `Max Comments Loaded - Due to limitations set by Reddit, only the last 1000 comments from a user can be loaded`);
         }
 
-        // Only enable stat calculation button if comments
-        // are loaded
-        calcBtn.disabled = false;
         queryStatus.textContent = 'Complete';
         //commentCount.textContent = posts.length;
         displayPosts();
@@ -714,6 +711,8 @@ function calculate() {
     // Clear error message
     statsErrorMsg.classList.remove('show');
 
+    tempScore = manualScore.value;
+
     let rangeLevel = 0;
     let baseArray = baseLevels[baseLevel.value];
     let baseRangeMin = baseArray[Object.keys(baseArray).length - 1].threshold;
@@ -777,7 +776,6 @@ function calculate() {
             tempScore = 0;
         }
     }
-
     earnedStats.textContent = Math.round(tempStatsEarned);
     earnedSplit.textContent = `(${Math.round(tempStatsEarned * 0.6)}/${Math.round(tempStatsEarned * 0.4)})`;
     newStats.textContent = currentStats.valueAsNumber + Math.round(tempStatsEarned);
@@ -796,5 +794,4 @@ function resetStatValues() {
     earnedStats.textContent = '0';
     earnedSplit.textContent = '(0/0)';
     newStats.textContent = '0';
-    calcBtn.disabled = true;
 }
