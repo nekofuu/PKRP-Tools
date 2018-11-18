@@ -140,6 +140,13 @@ body {
     font-size: 3em;
 }
 
+#manual-score {
+    line-height: 1.0em!important;
+    height: 1em;
+    padding:2px!important;
+    width: 40%;
+}
+
 #query-msg {
     margin: 2px 0;
 }

@@ -19,6 +19,7 @@ let currentStats = document.getElementById('current-stats');
 let baseLevel = document.getElementById('base-level');
 // Results
 let score = document.getElementById('score');
+let manualScore = document.getElementById('manual-score');
 let earnedStats = document.getElementById('earned-stats');
 let earnedSplit = document.getElementById('earned-split');
 let newStats = document.getElementById('new-stats');
@@ -68,6 +69,23 @@ startDate.addEventListener('change', () => {
         let endString = `${year}-${month}-${day}`;
         endDate.value = endString;
     }
+});
+
+manualScore.addEventListener('change', () => {
+    // Anytime the manual input changes, update the score field accordingly
+    if (manualScore.value <= 50 && manualScore.value >= 0) {
+        score.textContent = manualScore.value;
+    } else {
+        if (manualScore.value > 50) {
+            manualScore.value = 50;
+        }
+        if (manualScore.value < 0) {
+            manualScore.value = 0;
+        }
+    }
+
+    tempScore = manualScore.value;
+    calculate();
 });
 
 function logError(element, message) {
@@ -230,7 +248,9 @@ function calculateWords() {
                 }
             }
         }
-
+        // Calculate score as soon as word counting is done
+        updateScore();
+        calculate();
         //wordCount.textContent = tempWordCount;
         //wordsPerComment.textContent = (tempWordCount / comments.length).toFixed(1);
     }
@@ -667,11 +687,9 @@ const WORD_REQUIREMENT = 100;
 const WORDS_PER_POINT = 170;
 let tempScore = 0;
 
-calcBtn.addEventListener('click', () => {
-    // Whenever the Calculate Stats button is pressed
-    // Clear error message
-    statsErrorMsg.classList.remove('show');
+calcBtn.addEventListener('click', calculate);
 
+function updateScore() {
     // Get a temporary score by dividing word count by WORDS_PER_POINT
     tempScore = Math.round(tempWordCount / WORDS_PER_POINT);
     // If the player has written at least 100 words, they can get the minimum score of 20
@@ -688,6 +706,13 @@ calcBtn.addEventListener('click', () => {
     }
 
     score.textContent = tempScore;
+    manualScore.value = tempScore;
+}
+
+function calculate() {
+    // Whenever the Calculate Stats button is pressed
+    // Clear error message
+    statsErrorMsg.classList.remove('show');
 
     let rangeLevel = 0;
     let baseArray = baseLevels[baseLevel.value];
@@ -756,7 +781,7 @@ calcBtn.addEventListener('click', () => {
     earnedStats.textContent = Math.round(tempStatsEarned);
     earnedSplit.textContent = `(${Math.round(tempStatsEarned * 0.6)}/${Math.round(tempStatsEarned * 0.4)})`;
     newStats.textContent = currentStats.valueAsNumber + Math.round(tempStatsEarned);
-});
+}
 
 Object.size = function(obj) {
     var size = 0, key;
