@@ -73,15 +73,12 @@ startDate.addEventListener('change', () => {
 
 manualScore.addEventListener('change', () => {
     // Anytime the manual input changes, update the score field accordingly
-    if (manualScore.value <= 50 && manualScore.value >= 0) {
+    if (manualScore.value >= 0) {
+        // Do not check to see if manual score is greater than 50 since mods may
+        // Want to reward more than 50 score manually in the case of double stats
         score.textContent = manualScore.value;
     } else {
-        if (manualScore.value > 50) {
-            manualScore.value = 50;
-        }
-        if (manualScore.value < 0) {
-            manualScore.value = 0;
-        }
+        manualScore.value = 0;
     }
 
     tempScore = manualScore.value;
