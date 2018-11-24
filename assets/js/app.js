@@ -105,6 +105,9 @@ function fetchComments() {
     // potentially unrelated to the old ones
     resetStatValues();
 
+    // Disable fetch button until processing is complete
+    fetchBtn.disabled = true;
+
     query();
 }
 
@@ -116,6 +119,7 @@ function query(after = '') {
     
     request.ontimeout = () => {
         logError(fetchErrorMsg, `Error - Timed Out while Querying`);
+        fetchBtn.disabled = false;
     };
 
     request.open('GET', url);
@@ -130,6 +134,7 @@ function query(after = '') {
             let response = JSON.parse(request.response);
             if (response.error) {
                 logError(fetchErrorMsg, `Error Querying Username ${username.value} - ${response.error}: ${response.message}`);
+                fetchBtn.disabled = false;
             }
             //console.log(response.data.children);
             if (response.data) {
@@ -188,6 +193,8 @@ function processComments(data) {
             logError(fetchErrorMsg, `Max Comments Loaded - Due to limitations set by Reddit, only the last 1000 comments from a user can be loaded`);
         }
 
+        // Reenable fetchBtn so that the tool can still be used
+        fetchBtn.disabled = false;
         queryStatus.textContent = 'Complete';
         //commentCount.textContent = posts.length;
         displayPosts();
