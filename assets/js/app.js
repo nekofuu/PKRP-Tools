@@ -692,11 +692,11 @@ calcBtn.addEventListener('click', calculate);
 
 function updateScore() {
     // Get a temporary score by dividing word count by WORDS_PER_POINT
-    tempScore = Math.round(tempWordCount / WORDS_PER_POINT);
+    //tempScore = Math.floor(tempWordCount / WORDS_PER_POINT);
     // If the player has written at least 100 words, they can get the minimum score of 20
     if (tempWordCount >= WORD_REQUIREMENT) {
         // Calculate Score
-        tempScore = MIN_SCORE + Math.round(tempWordCount / WORDS_PER_POINT);
+        tempScore = MIN_SCORE + Math.floor(tempWordCount / WORDS_PER_POINT);
         // If score is above MAX_SCORE, set it equal to max score
         if (tempScore > MAX_SCORE) {
             tempScore = MAX_SCORE;
