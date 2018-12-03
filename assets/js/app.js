@@ -703,7 +703,7 @@ function updateScore() {
         }
     } else {
         logError(statsErrorMsg, 'Player did not write 100 words, 0 points awarded!');
-        return;
+        tempScore = 0;
     }
 
     score.textContent = tempScore;
