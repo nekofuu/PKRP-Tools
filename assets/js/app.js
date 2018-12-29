@@ -780,9 +780,10 @@ function calculate() {
             tempScore = 0;
         }
     }
-    earnedStats.textContent = Math.round(tempStatsEarned);
-    earnedSplit.textContent = `(${Math.round(tempStatsEarned * 0.6)}/${Math.round(tempStatsEarned * 0.4)})`;
-    newStats.textContent = currentStats.valueAsNumber + Math.round(tempStatsEarned);
+    let earnedRounded = Math.round(tempStatsEarned);
+    earnedStats.textContent = earnedRounded;
+    earnedSplit.textContent = `(${Math.round(earnedRounded * 0.6)}/${Math.round(earnedRounded * 0.4)})`;
+    newStats.textContent = currentStats.valueAsNumber + earnedRounded;
 }
 
 Object.size = function(obj) {
