@@ -800,3 +800,111 @@ function resetStatValues() {
     earnedSplit.textContent = '(0/0)';
     newStats.textContent = '0';
 }
+
+
+
+/*
+/
+/   TESTING
+/
+/
+*/
+
+function catchUp(testFirst, newb = 50) {
+    let first = testFirst;
+    let newbie = newb;
+    let testBase = 0;
+
+    let results = {};
+
+    let iterations = 0;
+
+    console.log(`${iterations}: First: ${first} | Newbie: ${newbie}`);
+
+    while(newbie < first) {
+        if (testBase > 9) break;
+        results = catchUpCalc(first, testBase);
+        if (results.Base !== testBase) {
+            testBase += 1;
+            continue;
+        } else {
+            first += results.Earned;
+            results = catchUpCalc(newbie, testBase);
+            if (results.Base !== testBase) {
+                testBase += 1;
+                continue;
+            } else {
+                newbie += results.Earned;
+            }
+        }
+
+        console.log(`${++iterations}: First: ${first} | Newbie: ${newbie}`);
+    }
+}
+
+function catchUpCalc(testStats, testBase) {
+    let returnVal = {
+        "Base": testBase,
+        "Earned": 0
+    }
+
+    let testScore = 50;
+
+    let rangeLevel = 0;
+    let baseArray = baseLevels[`base_${testBase}`];
+    let baseRangeMin = baseArray[Object.keys(baseArray).length - 1].threshold;
+    let baseRangeMax = baseRangeMin + 49;
+    let percent;
+    let isBottomRange;
+    let tempStatsEarned = 0;
+
+    // If the current stat total is outside of the range, set the rangeLevel
+    // to the size of the array
+    if (testStats >= baseRangeMin) {
+        rangeLevel = Object.keys(baseArray).length - 1;
+    } else {
+        // Iterate through the baseArray to find what rangeLevel we're at
+        for (let lvl in baseArray) {
+            lvl = Number(lvl);
+            if (testStats >= baseArray[lvl].threshold &&
+                testStats < baseArray[lvl+1].threshold) {
+                rangeLevel = lvl;
+                break;
+            }
+        }
+    }
+
+    while (testScore > 0) {
+        percent = baseArray[rangeLevel].percent;
+
+        if (rangeLevel === (Object.keys(baseArray).length - 1)) {
+            isBottomRange = true;
+        } else {
+            isBottomRange = false;
+        }
+
+        let temp = testScore * percent; //ROUNDED
+        let statsNeeded = 0;
+        if (isBottomRange) {
+            statsNeeded = baseRangeMax - testStats; //ROUNDED
+            if (temp > statsNeeded) {
+                returnVal.Base += 1;
+                return returnVal;
+            }
+        } else {
+            statsNeeded = (baseArray[rangeLevel+1].threshold - 1) - (testStats + tempStatsEarned);
+        }
+
+        if (temp > statsNeeded) {
+            let tmp = (statsNeeded / percent); //ROUNDED
+            testScore -= tmp;
+            tempStatsEarned += statsNeeded;
+            rangeLevel++;
+        } else {
+            tempStatsEarned += temp;
+            testScore = 0;
+        }
+    }
+    returnVal.Earned = Math.round(tempStatsEarned);
+    return returnVal;
+}
