@@ -842,6 +842,30 @@ function catchUp(testFirst, newb = 50) {
     }
 }
 
+function catchUpToMax(testFirst) {
+    let first = testFirst;
+    let testBase = 0;
+
+    let results = {};
+
+    let iterations = 0;
+
+    console.log(`${iterations}: Stats: ${first}`);
+
+    while(first < 2500) {
+        if (testBase > 9) break;
+        results = catchUpCalc(first, testBase);
+        if (results.Base !== testBase) {
+            testBase += 1;
+            continue;
+        } else {
+            first += results.Earned;
+        }
+
+        console.log(`${++iterations}: Stats: ${first}`);
+    }
+}
+
 function catchUpCalc(testStats, testBase) {
     let returnVal = {
         "Base": testBase,
