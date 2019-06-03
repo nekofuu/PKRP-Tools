@@ -158,6 +158,7 @@ body {
 #controls button {
     font-size: 1em;
     padding: 10px 0;
+    margin: 5px 0;
     width: 80%;
     border: none;
     border-radius: 5px;
@@ -197,6 +198,10 @@ body {
     border-radius: 5px;
     margin: 10px auto;
     padding: 10px;
+}
+
+.comment.filtered {
+    background-color: #8e4646;
 }
 
 .comment-title {
