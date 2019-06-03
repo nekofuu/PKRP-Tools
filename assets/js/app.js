@@ -195,25 +195,36 @@ function fetch(response) {
 
 function filter(response) {
     //console.log(response);
-    let id = response[1].data.children[0].data.id;
+    if (response[1].data.children.length > 0) {
+        let id = response[1].data.children[0].data.id;
 
-    if (response[1].data.children[0].data.author === "[deleted]") {
-        for (let post in posts) {
-            if (posts[post].id === id) {
-                // Mark to filter
-                posts[post].filter = true;
+        if (response[1].data.children[0].data.author === "[deleted]") {
+            for (let post in posts) {
+                if (posts[post].id === id) {
+                    // Mark to filter
+                    posts[post].filter = true;
+                }
             }
         }
-    }
 
-    if (id === posts[posts.length - 1].id) {
-        // Done filtering
-        filteringComments = false;
-    } else {
-        let url = `https://api.reddit.com${posts[++filterIndex].postedToLink}.json`;
-        //console.log(url);
-        if (!query(url, removeBtn, removeErrorMsg, filter)) {
+        if (id === posts[posts.length - 1].id) {
+            // Done filtering
             filteringComments = false;
+        } else {
+            let url = `https://api.reddit.com${posts[++filterIndex].postedToLink}.json`;
+            //console.log(url);
+            if (!query(url, removeBtn, removeErrorMsg, filter)) {
+                filteringComments = false;
+            }
+        }
+    } else {
+        posts[filterIndex].filter = true;
+        if (filterIndex < posts.length - 1) {
+            let url = `https://api.reddit.com${posts[++filterIndex].postedToLink}.json`;
+            //console.log(url);
+            if (!query(url, removeBtn, removeErrorMsg, filter)) {
+                filteringComments = false;
+            }
         }
     }
 
