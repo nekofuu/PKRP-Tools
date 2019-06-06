@@ -1047,3 +1047,73 @@ function catchUpCalc(testStats, testBase) {
     returnVal.Earned = Math.round(tempStatsEarned);
     return returnVal;
 }
+
+let thread = {}
+let fakeElement = document.createElement('p');
+// Take a link to a thread and count the number of words total in the thread
+function checkThread(link) {
+    thread = {
+        link: "",
+        words: 0,
+        comments: 0,
+        participants: {},
+        posts: []
+    }
+    thread.link = link + ".json";
+    
+    query(thread.link, fakeElement, fakeElement, processThread);
+}
+
+function processThread(response) {
+    let comment = response[1].data.children[0].data;
+
+    let post = {};
+    post.html = document.createElement('div');
+    post.html.innerHTML = decodeHTML(comment.body_html);
+    post.author = comment.author;
+    thread.posts.push(post);
+
+    thread.comments++;
+    
+    if (comment.replies !== "") {
+        let url = "https://api.reddit.com" + comment.replies.data.children[0].data.permalink + ".json";
+        query(url, fakeElement, fakeElement, processThread);
+    } else {
+        countThread();
+    }
+}
+
+function countThread() {
+    // Iterate through each comment from thread object and get word count
+    
+    for (let i in thread.posts) {
+        let commentElements = Array.from(thread.posts[i].html.children[0].children);
+        let author = thread.posts[i].author;
+        for (let element in commentElements) {
+            
+            // Check each element and only count the words within
+            // the element if it isn't a blockquote, table, or list
+            if (commentElements[element].tagName.toLowerCase() != 'blockquote' &&
+                commentElements[element].tagName.toLowerCase() != 'table' &&
+                commentElements[element].tagName.toLowerCase() != 'code' &&
+                commentElements[element].tagName.toLowerCase() != 'ul' &&
+                commentElements[element].tagName.toLowerCase() != 'ol')
+            {
+                let tempWords = countWords(commentElements[element].textContent);
+                thread.words += tempWords;
+                
+                if (author in thread.participants) {
+                    thread.participants[author].words += tempWords;
+                } else {
+                    thread.participants[author] = {};
+                    thread.participants[author].words = tempWords;
+                    thread.participants[author].comments = 0;
+
+                }
+            }
+        }
+        thread.participants[author].comments += 1;
+    }
+    
+    console.log("Thread processed!");
+}
