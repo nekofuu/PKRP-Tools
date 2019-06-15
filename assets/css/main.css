@@ -11,6 +11,15 @@ body {
     margin: 0;
 }
 
+#timer-label, #timer-counter {
+    margin: 5px 0;
+}
+
+#timer-counter {
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
 /* Responsive Columns layout */
 @media only screen and (max-width: 800px) {
     #filters-col {

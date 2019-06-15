@@ -1,4 +1,7 @@
 // Elements
+// Countdown Timer
+let timerLabel = document.getElementById('timer-label');
+let timerCounter = document.getElementById('timer-counter');
 // Posts collector inputs
 let username = document.getElementById('username');
 let subreddit = document.getElementById('subreddit');
@@ -53,7 +56,65 @@ removeBtn.addEventListener("click", removeComments);
 username.addEventListener('change', () => {
     usernameHeader.textContent = username.value;
 });
-startDate.addEventListener('change', () => {
+window.addEventListener('load', winLoad);
+baseLevel.addEventListener('change', changeStartingStats);
+
+// Window Load Function
+function winLoad() {
+    timerInit();
+    changeStartingStats();
+}
+
+// Initiate the countdown timer and automatically set the start date and end date
+function timerInit() {
+    let currentTime = new Date();
+    let year = currentTime.getUTCFullYear();
+    let month = (`0${currentTime.getUTCMonth() + 1}`).slice(-2);
+
+    if ((currentTime.getUTCDate() < 15 || (currentTime.getUTCDate() === 15 && currentTime.getUTCHours() < 12)) &&
+        (currentTime.getUTCDate() > 1 || (currentTime.getUTCDate() === 1 && currentTime.getUTCHours() >= 12))) {
+        let day = '01';
+        let startTime = `${year}-${month}-${day}`;
+        startDate.value = startTime;
+        
+    } else {
+        if (currentTime.getUTCDate() === 1) {
+            month = (`0${currentTime.getUTCMonth()}`).slice(-2);
+        }
+        let day = '15';
+        let startTime = `${year}-${month}-${day}`;
+        startDate.value = startTime;
+    }
+    changeDate();
+
+    let end = new Date(endDate.valueAsNumber);
+    end.setUTCHours(12);
+    let countdown = setInterval(function() {
+        let now = new Date().getTime();
+        let distance = end.getTime() - now;
+
+        var days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+        timerCounter.innerHTML = days + "d " + hours + "h " + minutes + "m " + seconds + "s";
+
+        if (distance < 0) {
+            clearInterval(x);
+            timerCounter.innerHTML = "EXPIRED";
+        }
+    }, 1000)
+}
+
+// Change starting Stats based on base
+function changeStartingStats() {
+    currentStats.value = 50 + (25 * parseInt(baseLevel.options[baseLevel.selectedIndex].textContent));
+}
+
+startDate.addEventListener('change', changeDate);
+
+function changeDate() {
     // Every time the start date is changed, check to see if
     // the new Start Date is either the 1st or the 15th of a month
     let start = new Date(startDate.value);
@@ -77,7 +138,7 @@ startDate.addEventListener('change', () => {
         let endString = `${year}-${month}-${day}`;
         endDate.value = endString;
     }
-});
+}
 
 manualScore.addEventListener('change', () => {
     // Anytime the manual input changes, update the score field accordingly
@@ -237,7 +298,6 @@ function filter(response) {
 function processComments(response) {
     let data = response.data;
     for (let comment in data.children) {
-        let keep = false;
         // Make sure comment is not older than start date
         // If it is, end processing
         if (data.children[comment].data.created_utc < (startDate.valueAsNumber / 1000) + 43200) {
@@ -252,16 +312,18 @@ function processComments(response) {
         // Check if comment was made in the correct subreddit
         // and if it was made later than end-date
         // if so, continue to next comment
-        if (data.children[comment].data.subreddit.localeCompare(subreddit.value, 'en', {sensitivity: 'base'}) !== 0 ||
-            data.children[comment].data.created_utc > (endDate.valueAsNumber / 1000) + 43200) {
+        if (data.children[comment].data.created_utc > (endDate.valueAsNumber / 1000) + 43200) {
+            continue;
+        }
+
+        if (data.children[comment].data.subreddit.localeCompare(subreddit.value, 'en', {sensitivity: 'base'}) !== 0) {
             if (subreddit.value.localeCompare('StrawHatRPG', 'en', {sensitivity: 'base'}) === 0) {
                 // If the subreddit is set to StrawHatRPG, then it checks if the comment was made in
                 // any of the subs within the StrawHatRPG Community
-                if (data.children[comment].data.subreddit.localeCompare('StrawHatRPGShops', 'en', {sensitivity: 'base'}) == 0) {
-                    keep = true;
+                if (data.children[comment].data.subreddit.localeCompare('StrawHatRPGShops', 'en', {sensitivity: 'base'}) !== 0) {
+                    continue;
                 } 
-            }
-            if (!keep) {
+            } else {
                 continue;
             }
         }
@@ -299,7 +361,6 @@ function displayPosts() {
     while (postsCol.lastChild.id !== 'posts-col-header') {
         postsCol.removeChild(postsCol.lastChild);
     }
-
     // Iterate through posts array
     for (let i in posts) {
         let commentDiv = document.createElement('div');
@@ -307,7 +368,7 @@ function displayPosts() {
 
         let commentTitle = document.createElement('h3');
         commentTitle.classList.add('comment-title');
-        commentTitle.innerHTML = `Posted to: <a href="https://reddit.com${posts[i].postedToLink}">${posts[i].postedTo}</a>`;
+        commentTitle.innerHTML = `Posted to: <a href="https://www.reddit.com${posts[i].postedToLink}">${posts[i].postedTo}</a>`;
         commentDiv.appendChild(commentTitle);
 
 
@@ -832,6 +893,11 @@ function calculate() {
 
     tempScore = manualScore.value;
 
+    let tempCurrentStats = 0;
+    let startingStats = 50 + (25 * parseInt(baseLevel.options[baseLevel.selectedIndex].textContent));
+    
+    tempCurrentStats = currentStats.valueAsNumber < startingStats ? startingStats : currentStats.valueAsNumber;
+    
     let rangeLevel = 0;
     let baseArray = baseLevels[baseLevel.value];
     let baseRangeMin = baseArray[Object.keys(baseArray).length - 1].threshold;
@@ -840,7 +906,7 @@ function calculate() {
     let isBaseValid, isBottomRange;
     let tempStatsEarned = 0;
 
-    if (currentStats.valueAsNumber > baseRangeMax) {
+    if (tempCurrentStats > baseRangeMax) {
         isBaseValid = false;
         logError(statsErrorMsg, 'Current Stat Total outside of Base Range!');
         return;
@@ -850,14 +916,14 @@ function calculate() {
 
     // If the current stat total is outside of the range, set the rangeLevel
     // to the size of the array
-    if (currentStats.valueAsNumber >= baseRangeMin) {
+    if (tempCurrentStats >= baseRangeMin) {
         rangeLevel = Object.keys(baseArray).length - 1;
     } else {
         // Iterate through the baseArray to find what rangeLevel we're at
         for (let lvl in baseArray) {
             lvl = Number(lvl);
-            if (currentStats.valueAsNumber >= baseArray[lvl].threshold &&
-                currentStats.valueAsNumber < baseArray[lvl+1].threshold) {
+            if (tempCurrentStats >= baseArray[lvl].threshold &&
+                tempCurrentStats < baseArray[lvl+1].threshold) {
                 rangeLevel = lvl;
                 break;
             }
@@ -876,13 +942,13 @@ function calculate() {
         let temp = tempScore * percent; //ROUNDED
         let statsNeeded = 0;
         if (isBottomRange) {
-            statsNeeded = baseRangeMax - currentStats.valueAsNumber; //ROUNDED
+            statsNeeded = baseRangeMax - tempCurrentStats; //ROUNDED
             if (temp > statsNeeded) {
                 logError(statsErrorMsg, 'You need to Base Up!');
                 return;
             }
         } else {
-            statsNeeded = (baseArray[rangeLevel+1].threshold - 1) - (currentStats.valueAsNumber + tempStatsEarned);
+            statsNeeded = (baseArray[rangeLevel+1].threshold - 1) - (tempCurrentStats + tempStatsEarned);
         }
 
         if (temp > statsNeeded) {
@@ -895,7 +961,12 @@ function calculate() {
             tempScore = 0;
         }
     }
+
     let earnedRounded = Math.round(tempStatsEarned);
+    if (tempCurrentStats > currentStats.valueAsNumber) {
+        earnedRounded += tempCurrentStats - currentStats.valueAsNumber;
+    }
+
     earnedStats.textContent = earnedRounded;
     earnedSplit.textContent = `(${Math.round(earnedRounded * 0.6)}/${Math.round(earnedRounded * 0.4)})`;
     newStats.textContent = currentStats.valueAsNumber + earnedRounded;
@@ -1046,4 +1117,74 @@ function catchUpCalc(testStats, testBase) {
     }
     returnVal.Earned = Math.round(tempStatsEarned);
     return returnVal;
+}
+
+let thread = {}
+let fakeElement = document.createElement('p');
+// Take a link to a thread and count the number of words total in the thread
+function checkThread(link) {
+    thread = {
+        link: "",
+        words: 0,
+        comments: 0,
+        participants: {},
+        posts: []
+    }
+    thread.link = link + ".json";
+    
+    query(thread.link, fakeElement, fakeElement, processThread);
+}
+
+function processThread(response) {
+    let comment = response[1].data.children[0].data;
+
+    let post = {};
+    post.html = document.createElement('div');
+    post.html.innerHTML = decodeHTML(comment.body_html);
+    post.author = comment.author;
+    thread.posts.push(post);
+
+    thread.comments++;
+    
+    if (comment.replies !== "") {
+        let url = "https://api.reddit.com" + comment.replies.data.children[0].data.permalink + ".json";
+        query(url, fakeElement, fakeElement, processThread);
+    } else {
+        countThread();
+    }
+}
+
+function countThread() {
+    // Iterate through each comment from thread object and get word count
+    
+    for (let i in thread.posts) {
+        let commentElements = Array.from(thread.posts[i].html.children[0].children);
+        let author = thread.posts[i].author;
+        for (let element in commentElements) {
+            
+            // Check each element and only count the words within
+            // the element if it isn't a blockquote, table, or list
+            if (commentElements[element].tagName.toLowerCase() != 'blockquote' &&
+                commentElements[element].tagName.toLowerCase() != 'table' &&
+                commentElements[element].tagName.toLowerCase() != 'code' &&
+                commentElements[element].tagName.toLowerCase() != 'ul' &&
+                commentElements[element].tagName.toLowerCase() != 'ol')
+            {
+                let tempWords = countWords(commentElements[element].textContent);
+                thread.words += tempWords;
+                
+                if (author in thread.participants) {
+                    thread.participants[author].words += tempWords;
+                } else {
+                    thread.participants[author] = {};
+                    thread.participants[author].words = tempWords;
+                    thread.participants[author].comments = 0;
+
+                }
+            }
+        }
+        thread.participants[author].comments += 1;
+    }
+    
+    console.log("Thread processed!");
 }
