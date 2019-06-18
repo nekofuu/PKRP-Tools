@@ -69,6 +69,16 @@ body {
     text-align: center;
 }
 
+#controls a, #control a:visited {
+    color: #3457f0;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+#controls a:hover {
+    text-decoration: underline;
+}
+
 #controls ul {
     list-style: none;
     padding: 0;
