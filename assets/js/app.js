@@ -517,7 +517,7 @@ function countWords(str) {
         percent: 3.0
     },
     { //2
-        threshold: 351,
+        threshold: 301,
         percent: 2.0
     },
     { //3
@@ -533,7 +533,7 @@ function countWords(str) {
         percent: 0.70
     },
     { //6
-        threshold: 700,
+        threshold: 701,
         percent: 0.55
     },
     { //7
@@ -547,11 +547,11 @@ function countWords(str) {
         percent: 4.0
     },
     { //2
-        threshold: 401,
+        threshold: 301,
         percent: 3.0
     },
     { //3
-        threshold: 601,
+        threshold: 551,
         percent: 2.0
     },
     { //4
@@ -581,15 +581,15 @@ function countWords(str) {
         percent: 5.0
     },
     { //2
-        threshold: 351,
+        threshold: 301,
         percent: 4.0
     },
     { //3
-        threshold: 651,
+        threshold: 551,
         percent: 3.0
     },
     { //4
-        threshold: 851,
+        threshold: 801,
         percent: 2.0
     },
     { //5
@@ -619,11 +619,11 @@ function countWords(str) {
         percent: 6.0
     },
     { //2
-        threshold: 351,
+        threshold: 301,
         percent: 5.0
     },
     { //3
-        threshold: 601,
+        threshold: 551,
         percent: 4.0
     },
     { //4
