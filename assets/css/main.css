@@ -21,16 +21,6 @@ body {
 }
 
 /* Responsive Columns layout */
-@media only screen and (max-width: 800px) {
-    #filters-col {
-
-    }
-
-    #posts-col {
-
-    }
-}
-
 @media only screen and (min-width: 800px) {
     #filters-col {
         position: fixed;
@@ -136,7 +126,7 @@ body {
 #calcs-inputs-list li {
     padding: 5px;
     width: 20%;
-    min-width: 100px;
+    min-width: 125px;
     max-width: 150px;
 }
 
@@ -195,6 +185,7 @@ body {
 
 .error-msg {
     color: #c00;
+    margin: 2px 5px;
     display: none;
 }
 

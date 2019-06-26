@@ -18,7 +18,7 @@
             <ul id="posts-inputs-list">
                 <li>
                     <label class="username">Reddit Username</label>
-                    <input type="text" placeholder="username" class="username" id="username">
+                    <input type="text" placeholder="username" class="username" id="username" autocomplete="off">
                 </li>
 
                 <li>
@@ -86,6 +86,11 @@
                         <option value="base_9">9</option>
                     </select>
                 </li>
+
+                <li>
+                    <label class="max-stats-total">Max Stats (<span id="max-stats-label-new">0</span>)</label>
+                    <input type="number" class="max-stats" id="max-stats" value="599" autocomplete="off">
+                </li>
             </ul>
 
             <!-- Results -->
@@ -114,7 +119,8 @@
             
             <button id="calc-btn">Calculate Stats</button>
 
-            <p id="stats-error-msg" class="error-msg show"></p>
+            <p id="max-error-msg" class="error-msg"></p>
+            <p id="stats-error-msg" class="error-msg"></p>
             
         </div>
     </div>

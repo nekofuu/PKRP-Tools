@@ -24,6 +24,8 @@ let removeErrorMsg = document.getElementById('remove-error-msg');
 // Stat Calculation Inputs
 let currentStats = document.getElementById('current-stats');
 let baseLevel = document.getElementById('base-level');
+let maxStatsLabelNew = document.getElementById('max-stats-label-new');
+let maxStats = document.getElementById('max-stats');
 // Results
 let score = document.getElementById('score');
 let manualScore = document.getElementById('manual-score');
@@ -32,6 +34,8 @@ let earnedSplit = document.getElementById('earned-split');
 let newStats = document.getElementById('new-stats');
 // Calculate Button
 let calcBtn = document.getElementById('calc-btn');
+// Max Error Message
+let maxErrorMsg = document.getElementById('max-error-msg');
 // Stats Error Message
 let statsErrorMsg = document.getElementById('stats-error-msg');
 // Username Header
@@ -44,6 +48,7 @@ const QUERY_LIMIT = 50;
 let processingComments = false;
 let filteringComments = false;
 let filterIndex = 0;
+let maxNewStats = 0;
 let tempWordCount = 0;
 let tempCommentCount = 0;
 let commentsLoaded = 0;
@@ -55,14 +60,17 @@ fetchBtn.addEventListener("click", fetchComments);
 removeBtn.addEventListener("click", removeComments);
 username.addEventListener('change', () => {
     usernameHeader.textContent = username.value;
+    fetchUserStats();
 });
 window.addEventListener('load', winLoad);
 baseLevel.addEventListener('change', changeStartingStats);
+maxStats.addEventListener('change', calculateMaxStats);
 
 // Window Load Function
 function winLoad() {
     timerInit();
     changeStartingStats();
+    fetchMaxStats();
 }
 
 // Initiate the countdown timer and automatically set the start date and end date
@@ -111,7 +119,153 @@ function timerInit() {
 
 // Change starting Stats based on base
 function changeStartingStats() {
+    //Calculate Max Stats since base is changed
+    calculateMaxStats();
     currentStats.value = 50 + (25 * parseInt(baseLevel.options[baseLevel.selectedIndex].textContent));
+}
+
+function calculateMaxStats() {
+    let calc = {newBase: 0};
+    let tempBase =  baseLevel.selectedIndex;
+    do {
+        calc = calculate(maxStats.valueAsNumber, 50, true, tempBase);
+        if (calc.newBase > tempBase) {
+            tempBase++;
+        }
+    } while (calc.newStats === 0 && calc.newBase <= 9);
+
+    if (calc.newBase > 9) {
+        maxStatsLabelNew.textContent = '0';
+        logError(statsErrorMsg, "Need more bases!");
+        return;
+    } else if (calc.newBase !== baseLevel.selectedIndex) {
+        maxStatsLabelNew.textContent = '0';
+        logError(statsErrorMsg, 'Incorrect Base; Change Base or Max!');
+    } else {
+        maxNewStats = calc.newStats;
+        maxStatsLabelNew.textContent = maxNewStats;
+    }
+}
+
+// Automatically fetch the max stats from the stats sheet
+function fetchMaxStats() {
+
+    // GET PAGE ID FROM HERE WHEN PUBLISHED
+    // https://spreadsheets.google.com/feeds/cells/SHEET_ID/od6/public/full?alt=json
+    
+    // OFFICIAL STAT SHEET
+    let sheetID = "11DBV69f-U9T1EXbdI_AvjHpp7XzSs38fH9eKqdx2sUw";
+    // JOEY'S SHEET FOR DEBUGGING
+    //let sheetID = "10bBzQNryutYgx49QEb2Vz19alL55lS_hEJ-FrJTOIFE";
+    let url = `https://spreadsheets.google.com/feeds/list/${sheetID}/1/public/full?alt=json`;
+
+    let request = new XMLHttpRequest();
+    
+    request.ontimeout = () => {
+        logError(statsErrorMsg, `Error - Timed Out while fetching max stats. Please manually input max stats.`);
+    };
+
+    request.open('GET', url);
+    request.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+
+    request.timeout = 5000;
+
+    request.send();
+    
+    request.onreadystatechange = function() {
+        if (request.readyState == XMLHttpRequest.DONE) {
+            if (request.status === 200) {
+                // Good response
+                let data = JSON.parse(request.response);
+                maxStats.valueAsNumber = data.feed.entry[0].gsx$currentmax.$t;
+                calculateMaxStats();
+                return;
+            } else {
+                logError(maxErrorMsg, "Error Fetching Max from Google - Using Default");
+                calculateMaxStats();
+                return;
+            }
+        }
+    }
+    
+    request.onabort = function() {
+        logError(maxErrorMsg, "Fetching Stats Aborted - Using Default");
+        calculateMaxStats();
+        return;
+    }
+
+    request.onerror = function() {
+        logError(maxErrorMsg, "Error Fetching Max from Google - Using Default");
+        console.log(`Error ${request.status}: ${request.statusText}`);
+        calculateMaxStats();
+        return;
+    }
+}
+
+// Attempt to fetch user's stats when a new username is entered
+function fetchUserStats() {
+    // Remove stats error because we're getting a new username and new stats
+    statsErrorMsg.classList.remove('show');
+
+    // GET PAGE ID FROM HERE WHEN PUBLISHED
+    // https://spreadsheets.google.com/feeds/cells/SHEET_ID/od6/public/full?alt=json
+    let sheetID = "11DBV69f-U9T1EXbdI_AvjHpp7XzSs38fH9eKqdx2sUw";
+
+    let url = `https://spreadsheets.google.com/feeds/list/${sheetID}/1/public/full?alt=json`;
+
+    let request = new XMLHttpRequest();
+    
+    request.ontimeout = () => {
+        logError(statsErrorMsg, `Error - Timed Out while fetching user's stats. Please manually input current stats.`);
+    };
+
+    request.open('GET', url);
+    request.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+
+    request.timeout = 5000;
+
+    request.send();
+    
+    request.onreadystatechange = function() {
+        if (request.readyState == XMLHttpRequest.DONE) {
+            if (request.status === 200) {
+                // Good response
+                let data = JSON.parse(request.response);
+                let entry = data.feed.entry.find((e) => {
+                    return (e.gsx$username.$t.localeCompare(username.value, 'en', {sensitivity: 'base'}) === 0)
+                });
+                if (entry) {
+                    currentStats.value = entry.gsx$totalbasestats.$t;
+                    fetchComments();
+                } else {
+                    logError(statsErrorMsg, "Error Fetching User's Stats. Check spelling or enter stats manually");
+                }
+                return;
+            } else {
+                logError(statsErrorMsg, "Error Fetching User's Stats from Google");
+                return;
+            }
+        }
+    }
+    
+    request.onabort = function() {
+        logError(statsErrorMsg, "Fetching User's Stats Aborted");
+        calculateMaxStats();
+        return;
+    }
+
+    request.onerror = function() {
+        logError(statsErrorMsg, "Error Fetching User's Stats from Google");
+        console.log(`Error ${request.status}: ${request.statusText}`);
+        calculateMaxStats();
+        return;
+    }
+}
+
+function updateCalcValues(calc) {
+    earnedStats.textContent = calc.earnedStats;
+    earnedSplit.textContent = calc.earnedSplit;
+    newStats.textContent = calc.newStats;
 }
 
 startDate.addEventListener('change', changeDate);
@@ -152,8 +306,7 @@ manualScore.addEventListener('change', () => {
         manualScore.value = 0;
     }
 
-    tempScore = manualScore.value;
-    calculate();
+    updateCalcValues(calculate(currentStats.valueAsNumber, manualScore.valueAsNumber));
 });
 
 function logError(element, message) {
@@ -429,7 +582,8 @@ function calculateWords() {
         }
         // Calculate score as soon as word counting is done
         updateScore();
-        calculate();
+
+        updateCalcValues(calculate(currentStats.valueAsNumber, manualScore.valueAsNumber));
         //wordCount.textContent = tempWordCount;
         //wordsPerComment.textContent = (tempWordCount / posts.length).toFixed(1);
     }
@@ -466,7 +620,7 @@ function countWords(str) {
     base_0: [
     { //1
         threshold: 0,
-        percent: 1.0
+        percent: 1.00
     },
     { //2
         threshold: 101,
@@ -492,7 +646,7 @@ function countWords(str) {
     },
     { //2
         threshold: 301,
-        percent: 1.0
+        percent: 1.00
     },
     { //3
         threshold: 351,
@@ -522,23 +676,23 @@ function countWords(str) {
     },
     { //3
         threshold: 551,
-        percent: 1.0
+        percent: 0.90
     },
     { //4
         threshold: 601,
-        percent: 0.85
+        percent: 0.70
     },
     { //5
         threshold: 651,
-        percent: 0.70
+        percent: 0.50
     },
     { //6
         threshold: 701,
-        percent: 0.55
+        percent: 0.40
     },
     { //7
         threshold: 751,
-        percent: 0.40
+        percent: 0.30
     }], //DONE
     
     base_3: [
@@ -556,23 +710,23 @@ function countWords(str) {
     },
     { //4
         threshold: 801,
-        percent: 1.0
+        percent: 0.90
     },
     { //5
         threshold: 851,
-        percent: 0.85
+        percent: 0.70
     },
     { //6
         threshold: 901,
-        percent: 0.70
+        percent: 0.50
     },
     { //7
         threshold: 951,
-        percent: 0.55
+        percent: 0.40
     },
     { //8
         threshold: 1001,
-        percent: 0.40
+        percent: 0.30
     }], //DONE
         
     base_4: [
@@ -598,8 +752,7 @@ function countWords(str) {
     },
     { //6
         threshold: 1101,
-        percent: 0.85
-    },
+        percent: 0.85    },
     { //7
         threshold: 1151,
         percent: 0.70
@@ -864,14 +1017,16 @@ const MAX_SCORE = 50;
 const MIN_SCORE = 20;
 const WORD_REQUIREMENT = 100;
 const WORDS_PER_POINT = 170;
-let tempScore = 0;
 
-calcBtn.addEventListener('click', calculate);
+calcBtn.addEventListener('click', () => {
+    updateCalcValues(calculate(currentStats.valueAsNumber, manualScore.valueAsNumber));
+});
 
 function updateScore() {
     // Get a temporary score by dividing word count by WORDS_PER_POINT
     //tempScore = Math.floor(tempWordCount / WORDS_PER_POINT);
     // If the player has written at least 100 words, they can get the minimum score of 20
+    let tempScore = 0;
     if (tempWordCount >= WORD_REQUIREMENT) {
         // Calculate Score
         tempScore = MIN_SCORE + Math.floor(tempWordCount / WORDS_PER_POINT);
@@ -888,38 +1043,37 @@ function updateScore() {
     manualScore.value = tempScore;
 }
 
-function calculate() {
+function calculate(stats, score, getMax = false, base = baseLevel.selectedIndex, max = maxStats.valueAsNumber, maxNew = Number(maxStatsLabelNew.textContent), logErrors = true) {
+    // Return value with all the different information we may need
+    let returnVal = {
+        earnedStats: 0,
+        earnedSplit: "",
+        newStats: 0,
+        newBase: base
+    }
+
     // Whenever the Calculate Stats button is pressed
     // Clear error message
     statsErrorMsg.classList.remove('show');
 
-    tempScore = manualScore.value;
-
+    // Change starting stats based on what base we're on
     let tempCurrentStats = 0;
-    let startingStats = 50 + (25 * parseInt(baseLevel.options[baseLevel.selectedIndex].textContent));
+    let startingStats = 50 + (25 * parseInt(baseLevel.options[base].textContent));
+    tempCurrentStats = stats < startingStats ? startingStats : stats;
     
-    tempCurrentStats = currentStats.valueAsNumber < startingStats ? startingStats : currentStats.valueAsNumber;
-    
+    let isMax = tempCurrentStats >= max;
     let rangeLevel = 0;
-    let baseArray = baseLevels[baseLevel.value];
-    let baseRangeMin = baseArray[Object.keys(baseArray).length - 1].threshold;
+    let baseArray = baseLevels[`base_${base}`];
+    let baseRangeMin = baseArray[baseArray.length - 1].threshold;
     let baseRangeMax = baseRangeMin + 49;
     let percent;
-    let isBaseValid, isBottomRange;
+    let isBottomRange;
     let tempStatsEarned = 0;
-
-    if (tempCurrentStats > baseRangeMax) {
-        isBaseValid = false;
-        logError(statsErrorMsg, 'Current Stat Total outside of Base Range!');
-        return;
-    } else {
-        isBaseValid = true;
-    }
 
     // If the current stat total is outside of the range, set the rangeLevel
     // to the size of the array
     if (tempCurrentStats >= baseRangeMin) {
-        rangeLevel = Object.keys(baseArray).length - 1;
+        rangeLevel = baseArray.length - 1;
     } else {
         // Iterate through the baseArray to find what rangeLevel we're at
         for (let lvl in baseArray) {
@@ -932,10 +1086,23 @@ function calculate() {
         }
     }
 
+    let tempScore = score;
     while (tempScore > 0) {
+        // Set to the currect percent
         percent = baseArray[rangeLevel].percent;
+        // Catch up system
+        // If percent is less than 1.0 and score is multiple of 50
+        if (percent < 1.0 && score % 50 === 0 && isMax === false) {
+            if (percent === 0.90) {
+                percent = 1.0;
+            } else {
+                // Give them a small boost equal to the midway percent value
+                // of their correct range and the range above theirs
+                percent = (percent + baseArray[rangeLevel - 1].percent) / 2;
+            }
+        }
 
-        if (rangeLevel === (Object.keys(baseArray).length - 1)) {
+        if (rangeLevel === (baseArray.length - 1)) {
             isBottomRange = true;
         } else {
             isBottomRange = false;
@@ -947,7 +1114,8 @@ function calculate() {
             statsNeeded = baseRangeMax - tempCurrentStats; //ROUNDED
             if (temp > statsNeeded) {
                 logError(statsErrorMsg, 'You need to Base Up!');
-                return;
+                returnVal.newBase += 1;
+                return returnVal;
             }
         } else {
             statsNeeded = (baseArray[rangeLevel+1].threshold - 1) - (tempCurrentStats + tempStatsEarned);
@@ -965,22 +1133,25 @@ function calculate() {
     }
 
     let earnedRounded = Math.round(tempStatsEarned);
-    if (tempCurrentStats > currentStats.valueAsNumber) {
-        earnedRounded += tempCurrentStats - currentStats.valueAsNumber;
+    if (tempCurrentStats > stats) {
+        earnedRounded += tempCurrentStats - stats;
+    }
+    
+    if (!getMax) {
+        if (stats + earnedRounded > maxNew) {
+            returnVal.earnedStats = maxNew - stats;
+            returnVal.earnedSplit = `(${Math.round(returnVal.earnedStats * 0.6)}/${Math.round(returnVal.earnedStats * 0.4)})`;
+            returnVal.newStats = stats + returnVal.earnedStats;
+
+            return returnVal;
+        }
     }
 
-    earnedStats.textContent = earnedRounded;
-    earnedSplit.textContent = `(${Math.round(earnedRounded * 0.6)}/${Math.round(earnedRounded * 0.4)})`;
-    newStats.textContent = currentStats.valueAsNumber + earnedRounded;
+    returnVal.earnedStats = earnedRounded;
+    returnVal.earnedSplit = `(${Math.round(earnedRounded * 0.6)}/${Math.round(earnedRounded * 0.4)})`;
+    returnVal.newStats = stats + earnedRounded;
+    return returnVal;
 }
-
-Object.size = function(obj) {
-    var size = 0, key;
-    for (key in obj) {
-        if (obj.hasOwnProperty(key)) size++;
-    }
-    return size;
-};
 
 function resetStatValues() {
     score.textContent = '0';
@@ -998,10 +1169,15 @@ function resetStatValues() {
 /
 */
 
-function catchUp(testFirst, newb = 50) {
-    let first = testFirst;
-    let newbie = newb;
+function catchUp(first, newbie, max = 0) {
+    let firstNew = 0;
+    let newbieNew = 0;
+    let maxNew = 0;
     let testBase = 0;
+
+    if (first > max) {
+        max = first;
+    }
 
     let results = {};
 
@@ -1010,115 +1186,68 @@ function catchUp(testFirst, newb = 50) {
     console.log(`${iterations}: First: ${first} | Newbie: ${newbie}`);
 
     while(newbie < first) {
-        if (testBase > 9) break;
-        results = catchUpCalc(first, testBase);
-        if (results.Base !== testBase) {
-            testBase += 1;
-            continue;
+        // Should have hit max stats, set first to stat limit
+        if (testBase > 9) {
+            firstNew = 2500;
+            maxNew = 2500;
         } else {
-            first += results.Earned;
-            results = catchUpCalc(newbie, testBase);
-            if (results.Base !== testBase) {
-                testBase += 1;
-                continue;
-            } else {
-                newbie += results.Earned;
+            // First do max
+            if (max > first) {
+                results = calculate(max, 50, true, testBase, max, null, false);
+                if (results.newBase !== testBase) {
+                    testBase += 1;
+                    continue;
+                }
+                maxNew = results.newStats;
             }
-        }
 
-        console.log(`${++iterations}: First: ${first} | Newbie: ${newbie}`);
-    }
-}
-
-function catchUpToMax(testFirst) {
-    let first = testFirst;
-    let testBase = 0;
-
-    let results = {};
-
-    let iterations = 0;
-
-    console.log(`${iterations}: Stats: ${first}`);
-
-    while(first < 2500) {
-        if (testBase > 9) break;
-        results = catchUpCalc(first, testBase);
-        if (results.Base !== testBase) {
-            testBase += 1;
-            continue;
-        } else {
-            first += results.Earned;
-        }
-
-        console.log(`${++iterations}: Stats: ${first}`);
-    }
-}
-
-function catchUpCalc(testStats, testBase) {
-    let returnVal = {
-        "Base": testBase,
-        "Earned": 0
-    }
-
-    let testScore = 50;
-
-    let rangeLevel = 0;
-    let baseArray = baseLevels[`base_${testBase}`];
-    let baseRangeMin = baseArray[Object.keys(baseArray).length - 1].threshold;
-    let baseRangeMax = baseRangeMin + 49;
-    let percent;
-    let isBottomRange;
-    let tempStatsEarned = 0;
-
-    // If the current stat total is outside of the range, set the rangeLevel
-    // to the size of the array
-    if (testStats >= baseRangeMin) {
-        rangeLevel = Object.keys(baseArray).length - 1;
-    } else {
-        // Iterate through the baseArray to find what rangeLevel we're at
-        for (let lvl in baseArray) {
-            lvl = Number(lvl);
-            if (testStats >= baseArray[lvl].threshold &&
-                testStats < baseArray[lvl+1].threshold) {
-                rangeLevel = lvl;
+            if (first === max) {
+                // First and Max are the same, so don't calculate max twice dummy
+                results = calculate(first, 50, true, testBase, max, null, false);
+                if (results.newBase !== testBase) {
+                    testBase += 1;
+                    continue;
+                }
+                firstNew = results.newStats;
+                maxNew = firstNew;
+            } else if (first < max) {
+                // First less than max, proceed as normal
+                results = calculate(first, 50, false, testBase, max, maxNew, false);
+                if (results.newBase !== testBase) {
+                    // This probably shouldn't happen but if it does I'd like to know
+                    console.log("Base up on first when not max?");
+                    break;
+                }
+                firstNew = results.newStats;
+            } else {
+                // This probably won't ever happen.
+                console.log("First is somehow greater than max.");
                 break;
             }
         }
-    }
 
-    while (testScore > 0) {
-        percent = baseArray[rangeLevel].percent;
-
-        if (rangeLevel === (Object.keys(baseArray).length - 1)) {
-            isBottomRange = true;
-        } else {
-            isBottomRange = false;
-        }
-
-        let temp = testScore * percent; //ROUNDED
-        let statsNeeded = 0;
-        if (isBottomRange) {
-            statsNeeded = baseRangeMax - testStats; //ROUNDED
-            if (temp > statsNeeded) {
-                returnVal.Base += 1;
-                return returnVal;
+        // Do newbie stats outside of the if/else in case the limit is hit
+        if (testBase > 9) {
+            results = calculate(newbie, 50, false, 9, max, maxNew, false);
+            if (results.newBase > 9) {
+                newbieNew = 2500;
+            } else {
+                newbieNew = results.newStats;
             }
         } else {
-            statsNeeded = (baseArray[rangeLevel+1].threshold - 1) - (testStats + tempStatsEarned);
+            results = calculate(newbie, 50, false, testBase, max, maxNew, false);
+            if (results.newBase !== testBase) {
+                console.log("Base up as newbie?");
+            }
+            newbieNew = results.newStats;
         }
 
-        if (temp > statsNeeded) {
-            let tmp = (statsNeeded / percent); //ROUNDED
-            testScore -= tmp;
-            tempStatsEarned += statsNeeded;
-            rangeLevel++;
-        } else {
-            tempStatsEarned += temp;
-            testScore = 0;
-        }
+        max = maxNew;
+        first = firstNew;
+        newbie = newbieNew;
+
+        console.log(`${++iterations}: First: ${first} | Newbie: ${newbie}`);
     }
-    returnVal.Earned = Math.round(tempStatsEarned);
-    return returnVal;
 }
 
 let thread = {}
