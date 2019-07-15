@@ -122,7 +122,7 @@ function timerInit() {
 function changeStartingStats() {
     //Calculate Max Stats since base is changed
     calculateMaxStats();
-    currentStats.value = 50 + (25 * parseInt(baseLevel.options[baseLevel.selectedIndex].textContent));
+    currentStats.value = 50 * (parseInt(baseLevel.options[baseLevel.selectedIndex].textContent) + 1);
 }
 
 function calculateMaxStats() {
@@ -1064,7 +1064,7 @@ function calculate(stats, score, getMax = false, base = baseLevel.selectedIndex,
 
     // Change starting stats based on what base we're on
     let tempCurrentStats = 0;
-    let startingStats = 50 + (25 * parseInt(baseLevel.options[base].textContent));
+    let startingStats = 50 * (parseInt(baseLevel.options[base].textContent) + 1);
     tempCurrentStats = stats < startingStats ? startingStats : stats;
     
     let isMax = tempCurrentStats >= max;
