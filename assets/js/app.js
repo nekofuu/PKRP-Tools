@@ -604,7 +604,8 @@ function decodeHTML(html) {
 function countWords(str) {
     // Use regular expression to replace things we don't want
     // counted as words with empty spaces, then extract all non-whitespace sequences
-    str = str.replace(/[.,?!()<>{}[\]/\\+=~'`|:;0-9-_]/g, '');
+    str = str.replace(/[.,?!()<>{}[\]/\\+=~'`|:;_-]/g, '');
+    str = str.replace(/-/g, ' ');
     let exp = /\S+/ig;
     let tmp, words = 0;
     while ((tmp = exp.exec(str)) != null) {
