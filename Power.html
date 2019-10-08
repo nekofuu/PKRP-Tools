@@ -1,0 +1,179 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="css/Power.css">
+    <title>SHRPG: Power Calculator</title>
+</head>
+<body>
+    <div id="filters-col">
+        <div id="controls">
+            <h1 class="col-headers">StrawHatRPG Slash/Attack Calculator</h1>
+            <a href="https://docs.google.com/spreadsheets/d/11DBV69f-U9T1EXbdI_AvjHpp7XzSs38fH9eKqdx2sUw">Stats Sheet</a>
+            <!-- Posts Collector Inputs -->
+            <ul>
+            </ul>
+            <ul id="posts-inputs-list">
+                <h2 class="col-headers">Stats</h2>
+
+                <li>
+                    <label class="statIPL">Strength</label>
+                    <input type="number" class="statIPF waveReq IP" id="strIPF" value="10" min="7" max="650">
+                </li>
+
+                <li>
+                    <label class="statIPL">Speed</label>
+                    <input type="number" class="statIPF waveReq IP" id="spdIPF" value="10" min="7" max="650">
+                </li>
+                
+                <li>
+                    <label class="statIPL">Dexterity</label>
+                    <input type="number" class="statIPF slashReq IP" id="dexIPF" value="10" min="7" max="650">
+                </li>
+                <li>
+                    <label class="statIPL">Will</label>
+                    <input type="number" class="statIPF slashReq IP" id="willIPF" value="10" min="7" max="650">
+                </li><br>
+                </ul>
+            <ul id="posts-inputs-list">
+                <li>
+                    <label class="AttackIPL">Attack Type/Level</label>
+                    <select class="AttackIPF IP" id="attackLevel">
+                        <option value="0">Normal Attack</option>
+                        <option value="1">Impact Wave Level 1</option>
+                        <option value="2">Impact Wave Level 2</option>
+                        <option value="3">Impact Wave Level 3</option>
+                        <option value="4">Impact Wave Level 4</option>
+                        <option value="5">Impact Wave Level 5</option>
+                    </select>
+                </li><br><br>
+                <li>
+                    <label class="SlashIPL">Blade Grade</label>
+                    <select class="SlashIPF IP" id="bladeGrade">
+                        <option value="0">Non-Meito</option>
+                        <option value="1">Wazamono</option>
+                        <option value="2">Ryo Wazamono</option>
+                        <option value="3">O Wazamono</option>
+                        <option value="4">Saijo O Wazamono</option>
+                    </select>
+                </li>
+                <li>
+                    <label class="SlashIPL">Slash Type/Level</label>
+                    <select class="SlashIPF IP" id="slashLevel">
+                        <option value="0">Normal Slash</option>
+                        <option value="1">Flying Slash Level 1</option>
+                        <option value="2">Flying Slash Level 2</option>
+                        <option value="3">Flying Slash Level 3</option>
+                        <option value="4">Flying Slash Level 4</option>
+                        <option value="5">Flying Slash Level 5</option>
+                    </select>
+                </li><br><br>
+                <li>
+                    <label class="SlashIPL">DF</label>
+                    <input type="radio" class="SlashIPF IP" id="DFCheck" name="DFUA" value="DF">
+                </li>
+                <li>
+                    <label class="SlashIPL">UA</label>
+                    <input type="radio" class="SlashIPF IP" id="UACheck" name="DFUA" value="UA">
+                </li>
+                <li>
+                    <label class="SlashIPL">None</label>
+                    <input type="radio" class="SlashIPF IP" id="NACheck" name="DFUA" value="NA">
+                </li>                                
+            </ul>
+            <hr>
+            
+            
+            <!--<p id="query-msg">Query Status: <span id="query-status">Idle</span></p>
+
+            <button id="fetch-btn">Fetch Comments</button>
+            
+            <p id="fetch-error-msg" class="error-msg"></p>
+
+            <button id="remove-btn">Filter Removed Comments</button> 
+
+            <p id="remove-error-msg" class="error-msg"></p>-->
+
+            <!-- Stat Calculations -->
+            <!--
+            <ul id="calcs-list">
+                <li>
+                    <p class="word-count"><span id="word-count">0</span> words counted</p>
+                </li>
+
+                <li>
+                    <p class="comment-count"><span id="comment-count">0</span> comments loaded</p>
+                </li>
+
+                <li>
+                    <p class="words-per-comment">Average of <span id="words-per-comment">0</span> words per comment</p>
+                </li>
+            </ul>
+            -->
+
+            <!-- Stat Calculation Inputs -->
+            <!--<ul id="calcs-inputs-list">
+                <li>
+                    <label class="current-stats-total">Current Stats</label>
+                    <input type="number" class="current-stats" id="current-stats" value="50" autocomplete="off">
+                </li>
+
+                <li>
+                    <label class="base-level">Base Level</label>
+                    <select id="base-level" autocomplete="off">
+                        <option value="base_0">0</option>
+                        <option value="base_1">1</option>
+                        <option value="base_2" selected="selected">2</option>
+                        <option value="base_3">3</option>
+                        <option value="base_4">4</option>
+                        <option value="base_5">5</option>
+                        <option value="base_6">6</option>
+                        <option value="base_7">7</option>
+                        <option value="base_8">8</option>
+                        <option value="base_9">9</option>
+                    </select>
+                </li>
+
+                <li>
+                    <label class="max-stats-total">Max Stats (<span id="max-stats-label-new">0</span>)</label>
+                    <input type="number" class="max-stats" id="max-stats" value="751" autocomplete="off">
+                </li>
+            </ul>-->
+
+            <!-- Results -->
+            <p id="slashReq-error-msg" class="error-msg">You do not have enough stats for the current level Flying Slash</p>
+            <p id="meitoGrade-error-msg" class="error-msg">Your Meito is too low level for the current level Flying Slash</p>
+            <p id="waveReq-error-msg" class="error-msg">You do not have enough stats for the current level Impact Wave</p>
+            <ul id="results-list">
+                <li>
+                    <p>
+                        <strong>Attack Power</strong>
+                        <span class="power" id="attackPower"><strong>0</strong></span>
+                        <span class="result" id="attackResult"><strong></strong></span>
+                    </p>
+                </li>
+                <li>
+                    <p>
+                        <strong>Slash Power</strong>
+                        <span class="power" id="slashPower"><strong>0</strong></span>
+                        <span class="result" id="slashResult"><strong></strong></span>
+                    </p>
+                </li>
+                
+            </ul>
+            
+            <button id="calc-btn" onclick="mainCalcFunction()">Calculate Power</button>
+        </div>
+    </div>
+
+    <div id="posts-col">
+        <h1 class="col-headers" id="posts-col-header">Comments for <span id="username-header"></span></h1>
+
+        <!-- Comments Go Here-->
+    </div>
+    <script type="text/javascript" src="js/Power.js"></script>
+</body>
+</html>

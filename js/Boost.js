@@ -328,11 +328,11 @@ function mainCalcFunction()
                 }
     
     
-            finalstam=Math.round(racebasestam+racebasestam*totalStamBoost-stancestamLoss);
-            finalstr=Math.round(racebasestr+racebasestr*totalStrBoost-stancestrLoss);
-            finalspd=Math.round(racebasespd+racebasespd*totalSpdBoost-stancespdLoss);
-            finaldex=Math.round(racebasedex+racebasedex*totalDexBoost-stancedexLoss);
-            finalwill=Math.round(racebasewill+racebasewill*totalWillBoost-stancewillLoss);
+            finalstam=Math.round(racebasestam+basestam*totalStamBoost-stancestamLoss);
+            finalstr=Math.round(racebasestr+basestr*totalStrBoost-stancestrLoss);
+            finalspd=Math.round(racebasespd+basespd*totalSpdBoost-stancespdLoss);
+            finaldex=Math.round(racebasedex+basedex*totalDexBoost-stancedexLoss);
+            finalwill=Math.round(racebasewill+basewill*totalWillBoost-stancewillLoss);
     
             if(finalstam>650)
                 {
@@ -363,7 +363,7 @@ function mainCalcFunction()
                     document.getElementById("statCap-warn-msg").style.visibility="visible";
                     finalwill=650;
                     document.getElementById("new-will").style.color="yellow";
-                }
+                }        
             finaltotal=finalstam+finalstr+finalspd+finaldex+finalwill;
             
             document.getElementById("new-stam").textContent=finalstam;
