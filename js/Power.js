@@ -153,6 +153,10 @@ function mainCalcFunction()
                 {
                     slashPower=685+(slashPower-685)/2;
                 }
+            else if (meitoGrade==4)
+                {
+                    //Do nothing if its a Saijo and its lower than 685
+                }
             else if((slashPower>560)&&(meitoGrade>=3))
                 {
                     slashPower=560+(slashPower-560)/2;
