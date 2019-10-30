@@ -341,7 +341,7 @@ function fetchComments() {
     fetchBtn.disabled = true;
 
     //let url = `https://api.reddit.com/user/${username.value}/comments/.json?limit=${QUERY_LIMIT}`;
-    let url = `https://api.reddit.com/user/${username.value}/.json`;
+    let url = `https://api.reddit.com/user/${username.value}/comments/.json`;
     query(url, fetchBtn, fetchErrorMsg, fetch);
 }
 
@@ -458,6 +458,7 @@ function filter(response) {
 
 function processComments(response) {
     let data = response.data;
+    //console.log(data);
     for (let comment in data.children) {
         // Make sure comment is not older than start date
         // If it is, end processing
@@ -503,6 +504,7 @@ function processComments(response) {
 
     if (processingComments && commentsLoaded < 1000 && data.after != null) {
         let url = `https://api.reddit.com/user/${username.value}/comments/.json?limit=${QUERY_LIMIT}&?&after=${data.after}`;
+        //console.log(url);
         query(url, fetchBtn, fetchErrorMsg, fetch);
     } else {
         if (commentsLoaded >= 1000) {
