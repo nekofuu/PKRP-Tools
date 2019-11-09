@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="assets/css/main.css">
+    <link rel="stylesheet" href="css/count.css">
+    <title>SHRPG: Word Counter</title>
+</head>
+<body>
+    <div id="controls-col">
+        <div id="controls">
+            <h1 class="col-headers">StrawHatRPG Word Count Tools</h1>
+
+            <!-- Thread Input -->
+            <p id="thread-input-text">Thread Link</p>
+            <input type="text" placeholder="Link" id="thread-input" autocomplete="off">
+            
+            <p id="thread-error-msg" class="error-msg"></p>
+
+            <button id="count-btn">Count</button>
+
+            <!-- Results -->
+            <h2>Results</h2>
+            <ul id="total-results">
+                <li>
+                    <p>
+                        Total Word Count
+                        <span id="word-count">0</span>
+                    </p>
+                </li>
+                <li>
+                    <p>
+                        Total Comment Count
+                        <span id="comment-count">0</span>
+                    </p>
+                </li>
+            </ul>
+
+            <table id="participants-table">
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Words</th>
+                        <th>Comments</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                </tbody>
+            </table>           
+        </div>
+    </div>
+
+    <div id="thread-posts-col">
+        <h1 class="col-headers" id="posts-col-header">Thread Comments</h1>
+
+        <!-- Comments Go Here-->
+    </div>
+    <script type="text/javascript" src="js/Count.js"></script>
+</body>
+</html>
