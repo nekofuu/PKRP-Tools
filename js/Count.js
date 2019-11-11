@@ -13,7 +13,7 @@ let totalCommentCount = document.getElementById('comment-count');
 let participantsTable = document.getElementById('participants-table');
 // Global Variables
 let posts = [];
-let filteredAccounts = ["NPC-senpai", "NPC-san", "Rewards-san", "Stats-san", "Shoppe-san", "DavyJones-san", "Newscoo-san", "tempnpc", "[deleted]"]
+let filteredAccounts = ["npc-senpai", "npc-san", "rewards-san", "stats-san", "shoppe-san", "davyjones-san", "newscoo-san", "tempnpc", "[deleted]"]
 let thread = {}
     
 countBtn.addEventListener('click', () => {
@@ -208,7 +208,7 @@ function display() {
 
         let checkBox = document.createElement('input');
         checkBox.setAttribute('type', 'checkbox');
-        if (filteredAccounts.indexOf(thread.participants[p].name) === -1) {
+        if (filteredAccounts.indexOf(thread.participants[p].name.toLowerCase()) === -1) {
             checkBox.checked = true;
         }
 
