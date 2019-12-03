@@ -54,6 +54,7 @@ let tempCommentCount = 0;
 let commentsLoaded = 0;
 let commentsRemoved = false;
 let posts = [];
+let str,stm,spd,dex,will;
 
 // Event Listeners
 fetchBtn.addEventListener("click", fetchComments);
@@ -208,6 +209,9 @@ function fetchUserStats() {
     // Remove stats error because we're getting a new username and new stats
     statsErrorMsg.classList.remove('show');
 
+    // Reset individual stats
+    str = stm = spd = dex = will = null;
+
     // GET PAGE ID FROM HERE WHEN PUBLISHED
     // https://spreadsheets.google.com/feeds/cells/SHEET_ID/od6/public/full?alt=json
     let sheetID = "11DBV69f-U9T1EXbdI_AvjHpp7XzSs38fH9eKqdx2sUw";
@@ -237,7 +241,12 @@ function fetchUserStats() {
                     return (e.gsx$username.$t.localeCompare(username.value, 'en', {sensitivity: 'base'}) === 0)
                 });
                 if (entry) {
-                    currentStats.value = entry.gsx$totalbasestats.$t;
+                    currentStats.value = Number(entry.gsx$totalbasestats.$t);
+                    stm=Number(entry.gsx$stamina.$t);
+                    str=Number(entry.gsx$strength.$t);
+                    spd=Number(entry.gsx$speed.$t);
+                    dex=Number(entry.gsx$dexterity.$t);
+                    will=Number(entry.gsx$willpower.$t);
                     fetchComments();
                 } else {
                     logError(statsErrorMsg, "Error Fetching User's Stats. Check spelling or enter stats manually");
@@ -1149,15 +1158,29 @@ function calculate(stats, score, getMax = false, base = baseLevel.selectedIndex,
     if (!getMax) {
         if (stats + earnedRounded > maxNew) {
             returnVal.earnedStats = maxNew - stats;
-            returnVal.earnedSplit = `(${Math.round(returnVal.earnedStats * 0.6)}/${Math.round(returnVal.earnedStats * 0.4)})`;
+            if(stm&&spd&&dex&&will)
+                {
+                    returnVal.earnedSplit=`(${Math.round((stats+returnVal.earnedStats) * 0.6-(stm+str+spd))}/${Math.round((stats+returnVal.earnedStats) * 0.4 - (dex+will))})`;
+                }
+            else
+                {
+                    returnVal.earnedSplit = `(${Math.round(returnVal.earnedStats * 0.6)}/${Math.round(returnVal.earnedStats * 0.4)})`;
+                }
             returnVal.newStats = stats + returnVal.earnedStats;
 
             return returnVal;
         }
     }
-
+    
     returnVal.earnedStats = earnedRounded;
-    returnVal.earnedSplit = `(${Math.round(earnedRounded * 0.6)}/${Math.round(earnedRounded * 0.4)})`;
+    if(stm&&spd&&dex&&will)
+        {
+            returnVal.earnedSplit=`(${Math.round((stats+returnVal.earnedStats)*.6-(stm+str+spd))}/${Math.round((stats+returnVal.earnedStats)*.4-(dex+will))})`;
+        }
+    else
+    {
+        returnVal.earnedSplit = `(${Math.round(earnedRounded * 0.6)}/${Math.round(earnedRounded * 0.4)})`;
+    }
     returnVal.newStats = stats + earnedRounded;
     return returnVal;
 }
