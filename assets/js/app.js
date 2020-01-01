@@ -89,7 +89,12 @@ function timerInit() {
         
     } else {
         if (currentTime.getUTCDate() === 1) {
-            month = (`0${currentTime.getUTCMonth()}`).slice(-2);
+            if (currentTime.getUTCMonth() === 0) {
+                month = 12;
+                year = currentTime.getUTCFullYear() - 1;
+            } else {
+                month = (`0${currentTime.getUTCMonth()}`).slice(-2);
+            }
         }
         let day = '15';
         let startTime = `${year}-${month}-${day}`;
