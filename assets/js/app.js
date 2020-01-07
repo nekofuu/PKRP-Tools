@@ -221,8 +221,7 @@ function fetchUserStats() {
     // https://spreadsheets.google.com/feeds/cells/SHEET_ID/od6/public/full?alt=json
     let sheetID = "11DBV69f-U9T1EXbdI_AvjHpp7XzSs38fH9eKqdx2sUw";
 
-    let url = `https://spreadsheets.google.com/feeds/list/${sheetID}/1/public/full?alt=json`;
-
+    let url = `https://spreadsheets.google.com/feeds/list/${sheetID}/2/public/full?alt=json`;
     let request = new XMLHttpRequest();
     
     request.ontimeout = () => {
@@ -241,17 +240,17 @@ function fetchUserStats() {
         if (request.readyState == XMLHttpRequest.DONE) {
             if (request.status === 200) {
                 // Good response
-                let data = JSON.parse(request.response);
-                let entry = data.feed.entry.find((e) => {
-                    return (e.gsx$username.$t.localeCompare(username.value, 'en', {sensitivity: 'base'}) === 0)
+                let data = JSON.parse(request.response).feed.entry;
+                let entry = data.findIndex((e) => {
+                    return (e.gsx$racialboost.$t.localeCompare(username.value, 'en', {sensitivity: 'base'}) === 0)
                 });
                 if (entry) {
-                    currentStats.value = Number(entry.gsx$totalbasestats.$t);
-                    stm=Number(entry.gsx$stamina.$t);
-                    str=Number(entry.gsx$strength.$t);
-                    spd=Number(entry.gsx$speed.$t);
-                    dex=Number(entry.gsx$dexterity.$t);
-                    will=Number(entry.gsx$willpower.$t);
+                    currentStats.value = Number(data[entry].gsx$currentstats.$t);
+                    stm=Number(data[entry+1].gsx$currentstats.$t);
+                    str=Number(data[entry+2].gsx$currentstats.$t);
+                    spd=Number(data[entry+3].gsx$currentstats.$t);
+                    dex=Number(data[entry+4].gsx$currentstats.$t);
+                    will=Number(data[entry+5].gsx$currentstats.$t);
                     fetchComments();
                 } else {
                     logError(statsErrorMsg, "Error Fetching User's Stats. Check spelling or enter stats manually");
