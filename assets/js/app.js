@@ -1162,7 +1162,7 @@ function calculate(stats, score, getMax = false, base = baseLevel.selectedIndex,
     if (!getMax) {
         if (stats + earnedRounded > maxNew) {
             returnVal.earnedStats = maxNew - stats;
-            if(stm&&spd&&dex&&will)
+            if((stm)&&(str)&&(spd)&&(dex)&&(will)&&(stm+str+spd+dex+will==stats))
                 {
                     returnVal.earnedSplit=`(${Math.round((stats+returnVal.earnedStats) * 0.6-(stm+str+spd))}/${Math.round((stats+returnVal.earnedStats) * 0.4 - (dex+will))})`;
                 }
@@ -1177,9 +1177,9 @@ function calculate(stats, score, getMax = false, base = baseLevel.selectedIndex,
     }
     
     returnVal.earnedStats = earnedRounded;
-    if(stm&&spd&&dex&&will)
+    if((stm)&&(str)&&(spd)&&(dex)&&(will)&&(stm+str+spd+dex+will==stats))
         {
-            returnVal.earnedSplit=`(${Math.round((stats+returnVal.earnedStats)*.6-(stm+str+spd))}/${Math.round((stats+returnVal.earnedStats)*.4-(dex+will))})`;
+            returnVal.earnedSplit=`(${Math.round((stats+returnVal.earnedStats) * 0.6-(stm+str+spd))}/${Math.round((stats+returnVal.earnedStats) * 0.4-(dex+will))})`;
         }
     else
     {
