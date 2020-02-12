@@ -1,0 +1,136 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="assets/css/main.css">
+    <title>StrawHatRPG Tools</title>
+</head>
+<body>
+    <div id="filters-col">
+        <div id="controls">
+            <h1 class="col-headers">StrawHatRPG Tools</h1>
+            <p id="timer-label">Time Left</p>
+            <p id="timer-counter">0d 0h 0m 0s</p>
+            <a href="https://docs.google.com/spreadsheets/d/11DBV69f-U9T1EXbdI_AvjHpp7XzSs38fH9eKqdx2sUw">Stats Sheet</a>
+            <!-- Posts Collector Inputs -->
+            <ul id="posts-inputs-list">
+                <li>
+                    <label class="username">Reddit Username</label>
+                    <input type="text" placeholder="username" class="username" id="username" autocomplete="off">
+                </li>
+
+                <li>
+                    <label class="subreddit">Subreddit</label>
+                    <input type="text" value="StrawHatRPG" class="subreddit" id="subreddit">
+                </li>
+
+                <li>
+                    <label class="date start-date">Start Date</label>
+                    <input type="date" class="date start-date" id="start-date">
+                </li>
+
+                <li>
+                    <label class="date end-date">End Date</label>
+                    <input type="date" class="date end-date" id="end-date">
+                </li>
+            </ul>
+            
+            <p id="query-msg">Query Status: <span id="query-status">Idle</span></p>
+
+            <button id="fetch-btn">Fetch Comments</button>
+            
+            <p id="fetch-error-msg" class="error-msg"></p>
+
+            <button id="remove-btn">Filter Removed Comments</button> 
+
+            <p id="remove-error-msg" class="error-msg"></p>
+
+            <!-- Stat Calculations -->
+            <!--
+            <ul id="calcs-list">
+                <li>
+                    <p class="word-count"><span id="word-count">0</span> words counted</p>
+                </li>
+
+                <li>
+                    <p class="comment-count"><span id="comment-count">0</span> comments loaded</p>
+                </li>
+
+                <li>
+                    <p class="words-per-comment">Average of <span id="words-per-comment">0</span> words per comment</p>
+                </li>
+            </ul>
+            -->
+
+            <!-- Stat Calculation Inputs -->
+            <ul id="calcs-inputs-list">
+                <li>
+                    <label class="current-stats-total">Current Stats</label>
+                    <input type="number" class="current-stats" id="current-stats" value="50" autocomplete="off">
+                </li>
+
+                <li>
+                    <label class="base-level">Base Level</label>
+                    <select id="base-level" autocomplete="off">
+                        <option value="base_0">0</option>
+                        <option value="base_1">1</option>
+                        <option value="base_2">2</option>
+                        <option value="base_3" selected="selected">3</option>
+                        <option value="base_4">4</option>
+                        <option value="base_5">5</option>
+                        <option value="base_6">6</option>
+                        <option value="base_7">7</option>
+                        <option value="base_8">8</option>
+                        <option value="base_9">9</option>
+                    </select>
+                </li>
+
+                <li>
+                    <label class="max-stats-total">Max Stats (<span id="max-stats-label-new">0</span>)</label>
+                    <input type="number" class="max-stats" id="max-stats" value="751" autocomplete="off">
+                </li>
+            </ul>
+
+            <!-- Results -->
+            <ul id="results-list">
+                <li>
+                    <p>
+                        Score
+                        <span id="score">0</span>
+                        <input type="number" id="manual-score" value="0" autocomplete="off">
+                    </p>
+                </li>
+                <li>
+                    <p>
+                        Earned Stats
+                        <span id="earned-stats">0</span>
+                        <span id="earned-split">(0/0)</span>
+                    </p>
+                </li>
+                <li>
+                    <p>
+                        New Stat Total
+                        <span id="new-stats">0</span>
+                    </p>
+                </li>
+            </ul>
+            
+            <button id="calc-btn">Calculate Stats</button>
+
+            <p id="max-error-msg" class="error-msg"></p>
+            <p id="stats-error-msg" class="error-msg"></p>
+            
+        </div>
+    </div>
+
+    <div id="posts-col">
+        <h1 class="col-headers" id="posts-col-header">Comments for <span id="username-header"></span></h1>
+
+        <!-- Comments Go Here-->
+    </div>
+    <script type="text/javascript" src="assets/js/app.js"></script>
+</body>
+</html>

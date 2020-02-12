@@ -145,7 +145,7 @@ body {
     display: block;
 }
 
-#score, #earned-stats, #new-stats {
+#score, #earned-stats, #new-stats, #new-start-stats {
     font-size: 3em;
 }
 

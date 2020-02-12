@@ -1,0 +1,266 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="css/Power.css">
+    <title>SHRPG: Combat Simulator</title>
+</head>
+<body>
+    <div id="filters-col">
+        <div id="controls">
+            <h1 class="col-headers">StrawHatRPG Combat Simulator</h1>
+            <a href="https://docs.google.com/spreadsheets/d/11DBV69f-U9T1EXbdI_AvjHpp7XzSs38fH9eKqdx2sUw">Stats Sheet</a>
+            <!-- Posts Collector Inputs -->
+            <ul>
+            </ul>
+            <ul id="posts-inputs-list">
+                <h2 class="col-headers">Attacker</h2>
+                <li>
+                    <label class="statIPL">Stamina</label>
+                    <input type="number" class="statIPF waveReq IP" id="attstmIPF" value="10" min="7" max="675">
+                </li>
+                <li>
+                    <label class="statIPL">Strength</label>
+                    <input type="number" class="statIPF waveReq IP" id="attstrIPF" value="10" min="7" max="675">
+                </li>
+
+                <li>
+                    <label class="statIPL">Speed</label>
+                    <input type="number" class="statIPF waveReq IP" id="attspdIPF" value="10" min="7" max="675">
+                </li>
+                
+                <li>
+                    <label class="statIPL">Dexterity</label>
+                    <input type="number" class="statIPF slashReq IP" id="attdexIPF" value="10" min="7" max="675">
+                </li>
+                <li>
+                    <label class="statIPL">Will</label>
+                    <input type="number" class="statIPF slashReq IP" id="attwillIPF" value="10" min="7" max="675">
+                </li>
+                <br>
+                </ul>
+            <ul id="posts-inputs-list">
+                <li>
+                    <label class="AttackIPL">Attack Type/Level</label>
+                    <select class="AttackIPF IP" id="attattackLevel">
+                        <option value="NS">Normal Attack</option>
+                        <option value="IW1">Impact Wave Level 1</option>
+                        <option value="IW2">Impact Wave Level 2</option>
+                        <option value="IW3">Impact Wave Level 3</option>
+                        <option value="IW4">Impact Wave Level 4</option>
+                        <option value="IW5">Impact Wave Level 5</option>
+                        <option value="FS1">Flying Slash Level 1</option>
+                        <option value="FS2">Flying Slash Level 2</option>
+                        <option value="FS3">Flying Slash Level 3</option>
+                        <option value="FS4">Flying Slash Level 4</option>
+                        <option value="FS5">Flying Slash Level 5</option>
+                        <option value="FSP">Flying Slash Specialzation (Power)</option>
+                        <option value="FSS">Flying Slash Specialzation (Other)</option>
+                        <option value="SO1">Soru Level 1</option>
+                        <option value="SO2">Soru Level 2</option>
+                        <option value="SO3">Soru Level 3</option>
+                        <option value="SOP">Soru Specialization (Speed)</option>
+                        <option value="SOS">Soru Specialization (Other)</option>
+                        <option value="SH1">Shigan Level 1</option>
+                        <option value="SH2">Shigan Level 2</option>
+                        <option value="SH3">Shigan Level 3</option>
+                        <option value="SHP">Shigan Specialzation (Power)</option>
+                        <option value="SHP">Shigan Specialzation (Other)</option>
+                        <option value="RK1">Rankyaku Level 1</option>
+                        <option value="RK2">Rankyaku Level 2</option>
+                        <option value="RK3">Rankyaku Level 3</option>
+                        <option value="RKP">Rankykau Specialzation (Power)</option>
+                        <option value="RKS">Rankykau Specialzation (Other)</option>
+                        <option value="RG1">Rokuogan Level 1</option>
+                        <option value="RG2">Rokuogan Level 2</option>
+                        <option value="RG3">Rokuogan Level 3</option>
+                        <option value="RGP">Rokuogan Specialzation (Power)</option>
+                        <option value="RGS">Rokuogan Specialzation (Other)</option>
+                        <option value="HAL">Haoshoku (Light)</option>
+                        <option value="HAM">Haoshoku (Medium)</option>
+                        <option value="HAH">Haoshoku (Heavy)</option>
+                        <option value="HAI">Haoshoku (Immense)</option>
+                        <option value="HAP">Haoshoku Specialzation (Power)</option>
+                        <option value="HAS">Haoshoku Specialzation (Other)</option>
+                    </select>
+                </li>
+                <li id="hideThisHaki">
+                    <label class="AttackIPL">Haki</label>
+                    <select class="HakiIPF IP" id="attHakiLevel">
+                        <option value="NA">None</option>
+                        <option value="HC1">Invisible Haki</option>
+                        <option value="HC2">Dull Haki</option>
+                        <option value="HC3">Shiny Haki</option>
+                        <option value="HCS">Haki Specialization (Hardness)</option>
+                        <option value="HR1">Ryou 1</option>
+                        <option value="HR2">Ryou 2</option>
+                        <option value="HRS">Haki Specialization (Ryou)</option>
+                    </select>
+                </li><br><br>
+                <li id="hideThisPowCheck">
+                    <label class="SlashIPL">Power Attack</label>
+                    <input type="checkbox" class="SlashIPF IP" id="attPowCheck" name="PowCheck" value="Pow">
+                </li>
+                <li id="hideThisHaoCheck">
+                    <label class="SlashIPL">Focused Blast</label>
+                    <input type="checkbox" class="SlashIPF IP" id="attHaoFoc" name="PowCheck" value="Pow">
+                </li>
+                <br><br>
+                <li id="hideThisBladeGrade">
+                    <label class="SlashIPL">Blade Grade</label>
+                    <select class="SlashIPF IP" id="attbladeGrade">
+                        <option value="NON">Non-Meito</option>
+                        <option value="WAZ">Wazamono</option>
+                        <option value="RYO">Ryo Wazamono</option>
+                        <option value="OWA">O Wazamono</option>
+                        <option value="SOW">Saijo O Wazamono</option>
+                    </select>
+                </li>
+                <ul id="hideThisCheck">
+                <br>
+                <li>
+                    <label class="SlashIPL">DF</label>
+                    <input type="radio" class="SlashIPF IP" id="attDFCheck" name="DFUA" value="DF">
+                </li>
+                <li>
+                    <label class="SlashIPL">UA</label>
+                    <input type="radio" class="SlashIPF IP" id="attUACheck" name="DFUA" value="UA">
+                </li>
+                <li>
+                    <label class="SlashIPL">None</label>
+                    <input type="radio" class="SlashIPF IP" id="attNACheck" name="DFUA" value="NA">
+                </li>
+                </ul>
+            
+            </ul>
+            
+            <ul id="results-list">
+                <li id="hideThisAttackRes">
+                    <p>
+                        <strong>Attack Power</strong>
+                        <span class="power" id="attPow"><strong>0</strong></span>
+                    </p>
+                </li>
+                <li id="hideThisSoru">
+                    <p>
+                        <strong>Boosted Speed</strong>
+                        <span class="power" id="SoruSpd"><strong>0</strong></span>
+                    </p>
+                </li>
+                <li id="hideThisHao">
+                    <p>
+                        <strong>Stamina Drain</strong>
+                        <span class="power" id="HaoRes"><strong>0</strong></span>
+                    </p>
+                </li>
+                
+            </ul>
+            <hr>
+            <ul id="posts-inputs-list">
+                <h2 class="col-headers">Defender</h2>
+                <li>
+                    <label class="statIPL">Stamina</label>
+                    <input type="number" class="statIPF waveReq IP" id="defstmIPF" value="10" min="7" max="750">
+                </li>
+                <li>
+                    <label class="statIPL">Will</label>
+                    <input type="number" class="statIPF slashReq IP" id="defwillIPF" value="10" min="7" max="750">
+                </li>
+                <br>
+                </ul>
+            <ul id="posts-inputs-list">
+                <li>
+                    <label class="AttackIPL">Tekkai</label>
+                    <select class="AttackIPF IP" id="deftekkaiLevel">
+                        <option value="NA">None</option>
+                        <option value="TK1">Tekkai Level 1</option>
+                        <option value="TK2">Tekkai Level 2</option>
+                        <option value="TK3">Tekkai Level 3</option>
+                        <option value="TKP">Tekkai Specialization (Hardness)</option>
+                        <option value="TKS">Tekkai Specialization (Other)</option>
+                    </select>
+                </li>
+                <li>
+                    <label class="AttackIPL">Haki</label>
+                    <select class="HakiIPF IP" id="defHakiLevel">
+                        <option value="NA">None</option>
+                        <option value="HC1">Invisible Haki</option>
+                        <option value="HC2">Dull Haki</option>
+                        <option value="HC3">Shiny Haki</option>
+                        <option value="HCP">Haki Specialization (Hardness)</option>
+                        <option value="HCS">Haki Specialization (Other)</option>
+                    </select>
+                </li><br><br>
+                <li>
+                    <label class="statIPL">Armament Hardness</label>
+                    <input type="number" class="statIPF waveReq IP" id="defarmIPF" value="0" max="650">
+                </li>
+                <li>
+                    <label class="AttackIPL">Haki (on the Armament)</label>
+                    <select class="HakiIPF IP" id="defArmHakiLevel">
+                        <option value="NA">None</option>
+                        <option value="HC1">Invisible Haki</option>
+                        <option value="HC2">Dull Haki</option>
+                        <option value="HC3">Shiny Haki</option>
+                        <option value="HCP">Haki Specialization (Hardness)</option>
+                        <option value="HCS">Haki Specialization (Other)</option>
+                    </select>
+                </li>
+                <br><br>
+                <li>
+                    <label class="SlashIPL">Armament Size</label>
+                    <select class="SlashIPF IP" id="defFullCheck" name="PowCheck" value="Pow">
+                        <option value="H1">Tiny</option>
+                        <option value="H2">Small</option>
+                        <option value="H3">Medium</option>
+                        <option value="H4">Large/Bulky</option>
+                        <option value="H5">Massive/Full Suit</option>
+                    </select>
+                </li>
+                <li>
+                    <label class="AttackIPL">Armament Perk</label>
+                    <select class="HakiIPF IP" id="defArmorPerkLevel">
+                        <option value="NA">None</option>
+                        <option value="AP1">Armour Perk 1</option>
+                        <option value="AP2">Armour Perk 2</option>
+                        <option value="AP3">Armour Perk 3</option>
+                        <option value="AP4">Armour Perk 4</option>
+                        <option value="AP5">Armour Perk 5</option>
+                    </select>
+                </li><br><br>
+            </ul>
+            
+
+            <!-- Results -->
+            <ul id="results-list">
+                <li id="hideThisDefResult2">
+                    <p>
+                        <strong>Innate Defense</strong>
+                        <span class="power" id="InnDef"><strong>0</strong></span>
+                        <span id="DmgLvl"><strong></strong></span>
+                    </p>
+                </li>
+                <li id="hideThisDefResult2">
+                    <p>
+                        <strong>Armor Defense</strong>
+                        <span class="power" id="ArmDef"><strong>0</strong></span>
+                        <span id="DmgLvl2"><strong></strong></span>
+                    </p>
+                </li>
+                <li id="hideThisDefResultSpd">
+                    <p>
+                        <strong>Speed Penalty</strong>
+                        <span class="power" id="SpdPen"><strong>0</strong></span>
+                    </p>
+                </li>
+                
+            </ul>
+            
+        </div>
+    </div>
+    <script type="text/javascript" src="js/Combat.js"></script>
+</body>
+</html>

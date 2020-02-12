@@ -23,13 +23,37 @@
                 </li><br>
                 <h2 class="col-headers">Base Stats for<label id="charName"></label></h2>
                 <li>
-                    <label class="statIPL">Total Temporary Boost (Max 75%)</label>
-                    <input type="number" class="IP Boost" id="maxBoost" style="opacity: 1;" value="0" max="75" disabled>
+                    <label class="statIPL">Total % Boost (Max <span class="maxPercBoost">0</span>%)</label>
+                    <input type="percent" class="IP Boost PercBoost" id="totalPercBoost" value="0" max="10" disabled>
+                </li>
+                <li>
+                    <label class="statIPL">Total Flat Boost (Max <span class="maxTotalFlatBoost">0</span>)</label>
+                    <input type="percent" class="IP Boost FlatBoost" id="totalFlatBoost" value="0" max="100" disabled>
                 </li><br><br>
                 <li>
                     <label class="statIPL">Total Stats</label>
-                    <input type="number" class="statIPF" id="TotalIPF" style="opacity: 1;" disabled>
-                </li><br><br>
+                    <input type="number" class="IP statIPF" id="TotalIPF" style="opacity: 1;" disabled>
+                </li>
+                <!--<li>
+                    <label class="statIPL">Mino Transformations</label>
+                    <select class="IP" id="MaxModifier">
+                        <option value="NON">None</option>
+                        <option value="M1">Mythical Zoan Level 1</option>
+                        <option value="M2">Mythical Zoan Level 2</option>
+                        <option value="M3">Mythical Zoan Level 3</option>
+                        <option value="M4">Mythical Zoan Level 4</option>
+                        <option value="M5">Mythical Zoan Level 5</option>
+                        <option value="O1">Normal/Ancient Zoan Level 1</option>
+                        <option value="O2">Normal/Ancient Zoan Level 2</option>
+                        <option value="O3">Normal/Ancient Zoan Level 3</option>
+                        <option value="O4">Normal/Ancient Zoan Level 4</option>
+                        <option value="O5">Normal/Ancient Zoan Level 5</option>
+                        <option value="A1">Basic Mino Transformation</option>
+                        <option value="A2">Intermediate Mino Transformation</option>
+                        <option value="A3">Mastered Mino Transformation</option>
+                    </select>
+                </li>-->
+                <br><br>
                 <li>
                     <label class="statIPL">Stamina</label>
                     <input type="number" class="statIPF IP" id="stamIPF" value="10" min="7" max="500">
@@ -56,56 +80,110 @@
                 <h4 class="col-headers">Racial Boosts</h4>
                 <li>
                     <label class="statIPL">Stamina</label>
-                    <input type="number" class="statIPF raceBoost IP" id="stamRIPF" value="0" max="22">
+                    <input type="number" class="statIPF raceBoost IP" id="stamRIPF" value="0" max="3"  >
                 </li>
 
                 <li>
                     <label class="statIPL">Strength</label>
-                    <input type="number" class="statIPF raceBoost IP" id="strRIPF" value="0" max="22"> <!--maxes are diff cause of giants-->
+                    <input type="number" class="statIPF raceBoost IP" id="strRIPF" value="0" max="4"  > <!--maxes are diff cause of giants-->
                 </li>
 
                 <li>
                     <label class="statIPL">Speed</label>
-                    <input type="number" class="statIPF raceBoost IP" id="spdRIPF" value="0" max="15">
+                    <input type="number" class="statIPF raceBoost IP" id="spdRIPF" value="0" max="3" >
                 </li>
                 
                 <li>
                     <label class="statIPL">Dexterity</label>
-                    <input type="number" class="statIPF raceBoost IP" id="dexRIPF" value="0" max="15">
+                    <input type="number" class="statIPF raceBoost IP" id="dexRIPF" value="0" max="3" >
                 </li>
                 <li>
                     <label class="statIPL">Will</label>
-                    <input type="number" class="statIPF raceBoost IP" id="willRIPF" value="0" max="15">
+                    <input type="number" class="statIPF raceBoost IP" id="willRIPF" value="0" max="3" >
                 </li>
                 </ul>
                 <hr>
                 <h2 class="col-headers">Temporary Boosts</h2>
-            <ul id="posts-inputs-list">
+                <h3 class="col-headers">Percentage Boosts</h3>
+                <ul id="posts-inputs-list">
                 <li>
-                    <label class="TempBoostIPL">Stamina</label>
-                    <input type="number" class="TempBoostIPF IP Boost stamBoost" id="stamTempBoostIPF" value="0" max="40">
+                    <label class="TempBoostIPL">Stamina(Soft Cap: <span class="maxPhysBoost">0</span>%)</label>
+                    <input type="number" class="IP stamPercBoost PercBoost" id="stamTempBoostIPF" value="0" max="6" >
                 </li>
 
                 <li>
-                    <label class="TempBoostIPL">Strength</label>
-                    <input type="number" class="TempBoostIPF IP Boost strBoost" id="strTempBoostIPF" value="0" max="40">
+                    <label class="TempBoostIPL">Strength(Soft Cap <span class="maxPhysBoost">0</span>%)</label>
+                    <input type="number" class="IP strPercBoost PercBoost" id="strTempBoostIPF" value="0" max="6" >
                 </li>
 
                 <li>
-                    <label class="TempBoostIPL">Speed</label>
-                    <input type="number" class="TempBoostIPF IP Boost spdBoost" id="spdTempBoostIPF" value="0" max="40">
+                    <label class="TempBoostIPL">Speed(Soft Cap <span class="maxPhysBoost">0</span>%)</label>
+                    <input type="number" class="IP spdPercBoost PercBoost" id="spdTempBoostIPF" value="0" max="6" >
                 </li> 
                 
                 <li>
-                    <label class="TempBoostIPL">Dexterity</label>
-                    <input type="number" class="TempBoostIPF IP Boost dexBoost" id="dexTempBoostIPF" value="0" max="40">
+                    <label class="TempBoostIPL">Dexterity(Soft Cap <span class="maxMentBoost">0</span>%)</label>
+                    <input type="number" class="IP dexPercBoost PercBoost" id="dexTempBoostIPF" value="0" max="6" >
                 </li>
                 <li>
-                    <label class="TempBoostIPL">Will</label>
-                    <input type="number" class="TempBoostIPF IP Boost willBoost" id="willTempBoostIPF" value="0" max="40">
+                    <label class="TempBoostIPL">Will(Soft Cap <span class="maxMentBoost">0</span>%)</label>
+                    <input type="number" class="IP willPercBoost PercBoost" id="willTempBoostIPF" value="0" max="6" >
                 </li>
             </ul>
-                <h3 class="col-headers">Stances</h3>
+            <ul id="posts-inputs-list">
+                <h3 class="col-headers">Flat Boosts</h3>
+                <li>
+                    <label class="TempBoostFLatIPL">Stamina(Soft Cap <span class="maxFlatBoost">0</span>)</label>
+                    <input type="number" class="IP stamFlatBoost FlatBoost" id="stamTempFlatBoostIPF" value="0">
+                </li>
+
+                <li>
+                    <label class="TempBoostFlatIPL">Strength(Soft Cap <span class="maxFlatBoost">0</span>)</label>
+                    <input type="number" class="IP strFlatBoost FlatBoost" id="strTempFlatBoostIPF" value="0">
+                </li>
+
+                <li>
+                    <label class="TempBoostFlatIPL">Speed(Soft Cap <span class="maxFlatBoost">0</span>)</label>
+                    <input type="number" class="IP spdFlatBoost FlatBoost" id="spdTempFlatBoostIPF" value="0">
+                </li> 
+                
+                <li>
+                    <label class="TempBoostFlatIPL">Dexterity(Soft Cap <span class="maxFlatBoost">0</span>)</label>
+                    <input type="number" class="IP dexFlatBoost FlatBoost" id="dexTempFlatBoostIPF" value="0">
+                </li>
+                <li>
+                    <label class="TempBoostFlatIPL">Will(Soft Cap <span class="maxFlatBoost">0</span>)</label>
+                    <input type="number" class="IP willFlatBoost FlatBoost" id="willTempFlatBoostIPF" value="0">
+                </li>
+            </ul>
+            <ul id="posts-inputs-list">
+                <h3 class="col-headers">Flat Losses</h3>
+                <li>
+                    <label class="TempBoostFLatIPL">Stamina</label>
+                    <input type="number" class="FlatLoss IP" id="stamTempFlatLossIPF" value="0">
+                </li>
+
+                <li>
+                    <label class="TempBoostFlatIPL">Strength</label>
+                    <input type="number" class="FlatLoss IP" id="strTempFlatLossIPF" value="0">
+                </li>
+
+                <li>
+                    <label class="TempBoostFlatIPL">Speed</label>
+                    <input type="number" class="FlatLoss IP" id="spdTempFlatLossIPF" value="0">
+                </li> 
+                
+                <li>
+                    <label class="TempBoostFlatIPL">Dexterity</label>
+                    <input type="number" class="FlatLoss IP" id="dexTempFlatLossIPF" value="0">
+                </li>
+                <li>
+                    <label class="TempBoostFlatIPL">Will</label>
+                    <input type="number" class="FlatLoss IP" id="willTempFlatLossIPF" value="0">
+                </li>
+            </ul>
+            <hr>
+            <h3 class="col-headers">Stances</h3>
             <ul id="posts-inputs-list">
                 <li>
                     <label class="StancesIPL">Stances Perk</label>
@@ -118,133 +196,84 @@
                 </li>
                 <li>
                     <label class="StancesIPL">Stat Loss Reduction</label>
-                    <input type="number" class="StancesIPF IP" id="LossRedIPF" value="0" style="opacity: 1" disabled>
+                    <input type="number" class="StancesIPF IP" id="LossRedIPF" value="0" disabled>
                 </li>
                 <li>
-                    <label class="StancesIPL">Strong Willed</label>
+                    <label class="StancesIPL">Focused Stances</label>
                     <input type="checkbox" class="StancesIPF IP" id="StrongWillIPF">
                 </li><br><br>
                 <li>
-                    <label class="StancesIPL"><h4 class="col-headers">Stance Percentage Boost</h4></label>
+                    <label class="StancesIPL"><h4 class="col-headers">Stance Percentage Boost/Loss</h4></label>
                 </li><br>
                 <li>
-                    <label class="StancesIPL">Stamina</label>
-                    <input type="number" class="StacnesIPF Boost stamBoost stanceBoost IP" id="stamStancesIPF" value="0" max="20">
+                    <label class="StancesIPL">Stamina(Max <span class="maxStanceBoost">0</span>%)</label>
+                    <input type="number" class="StancesIPF IP stancePercBoost stamPercBoost PercBoost" id="stamStancesPIPF" value="0" max="20" >
                 </li>
 
                 <li>
-                    <label class="StancesIPL">Strength</label>
-                    <input type="number" class="StancesIPF IP Boost stanceBoost strBoost" id="strStancesIPF" value="0" max="20">
+                    <label class="StancesIPL">Strength(Max <span class="maxStanceBoost">0</span>%)</label>
+                    <input type="number" class="StancesIPF IP stancePercBoost strPercBoost PercBoost" id="strStancesPIPF" value="0" max="20" >
                 </li>
 
                 <li>
-                    <label class="StancesIPL">Speed</label>
-                    <input type="number" class="StancesIPF IP Boost stanceBoost spdBoost" id="spdStancesIPF" value="0" max="20">
+                    <label class="StancesIPL">Speed(Max <span class="maxStanceBoost">0</span>%)</label>
+                    <input type="number" class="StancesIPF IP stancePercBoost spdPercBoost PercBoost" id="spdStancesPIPF" value="0" max="20" >
                 </li>
                 
                 <li>
-                    <label class="StancesIPL">Dexterity</label>
-                    <input type="number" class="StancesIPF IP Boost stanceBoost dexBoost" id="dexStancesIPF" value="0" max="20" disabled>
+                    <label class="StancesIPL">Dexterity(Max <span class="maxStanceBoost">0</span>%)</label>
+                    <input type="number" class="StancesIPF IP stancePercBoost dexPercBoost PercBoost" id="dexStancesPIPF" value="0" max="20"  disabled>
                 </li>
                 <li>
-                    <label class="StancesIPL">Will</label>
-                    <input type="number" class="StancesIPF IP Boost stanceBoost willBoost" id="willStancesIPF" value="0" max="20" disabled>
+                    <label class="StancesIPL">Will(Max <span class="maxStanceBoost">0</span>%)</label>
+                    <input type="number" class="StancesIPF IP stancePercBoost willPercBoost PercBoost" id="willStancesPIPF" value="0" max="20"  disabled>
+                </li>
+                <li>
+                    <label class="StancesIPL"><strong>Remaining Loss</strong></label>
+                    <input type="percent" class="StancesIPF IP stanceLossPerc" id="totalStancesLossP" value="0" disabled>
                 </li>
                 <br><br>
                 <li>
-                    <label class="StancesIPL"><h4 class="col-headers">Flat Loss</h4></label>
+                    <label class="StancesIPL"><h4 class="col-headers">Stance Flat Boost/Loss</h4></label>
                 </li><br>
                 <li>
-                    <label class="StancesIPL">Stamina</label>
-                    <input type="number" class="StacnesIPF IP stanceLoss" id="stamStancesLossIPF" value="0">
+                    <label class="StancesIPL">Stamina(Max <span class="maxStanceFlatBoost">0</span>)</label>
+                    <input type="number" class="StancesIPF IP stanceFlatBoost stamFlatBoost FlatBoost" id="stamStancesFIPF" value="0" disabled>
                 </li>
 
                 <li>
-                    <label class="StancesIPL">Strength</label>
-                    <input type="number" class="StancesIPF IP stanceLoss" id="strStancesLossIPF" value="0">
+                    <label class="StancesIPL">Strength(Max <span class="maxStanceFlatBoost">0</span>)</label>
+                    <input type="number" class="StancesIPF IP stanceFlatBoost strFlatBoost FlatBoost" id="strStancesFIPF" value="0" disabled>
                 </li>
 
                 <li>
-                    <label class="StancesIPL">Speed</label>
-                    <input type="number" class="StancesIPF IP stanceLoss" id="spdStancesLossIPF" value="0">
+                    <label class="StancesIPL">Speed(Max <span class="maxStanceFlatBoost">0</span>)</label>
+                    <input type="number" class="StancesIPF IP stanceFlatBoost spdFlatBoost FlatBoost" id="spdStancesFIPF" value="0" disabled>
                 </li>
                 
                 <li>
-                    <label class="StancesIPL">Dexterity</label>
-                    <input type="number" class="StancesIPF IP stanceLoss" id="dexStancesLossIPF" value="0" disabled>
+                    <label class="StancesIPL">Dexterity(Max <span class="maxStanceFlatBoost">0</span>)</label>
+                    <input type="number" class="StancesIPF IP stanceFlatBoost dexFlatBoost FlatBoost" id="dexStancesFIPF" value="0" disabled>
                 </li>
                 <li>
-                    <label class="StancesIPL">Will</label>
-                    <input type="number" class="StancesIPF IP stanceLoss" id="willStancesLossIPF" value="0" disabled>
+                    <label class="StancesIPL">Will(Max <span class="maxStanceFlatBoost">0</span>)</label>
+                    <input type="number" class="StancesIPF IP stanceFlatBoost willFlatBoost FlatBoost" id="willStancesFIPF" value="0" disabled>
                 </li>
                 <li>
-                    <label class="StancesIPL"><strong>Remaining Stat Loss</strong></label>
-                    <input type="number" class="StancesIPF IP stanceLoss" id="totalStancesLossF" value="0" disabled>
-                </li>                
+                    <label class="StancesIPL"><strong>Remaining Loss</strong></label>
+                    <input type="percent" class="StancesIPF IP stanceLossFlat" id="totalStancesLossF" value="0" disabled>
+                </li>
             </ul>
             <hr>
             
-            
-            <!--<p id="query-msg">Query Status: <span id="query-status">Idle</span></p>
-
-            <button id="fetch-btn">Fetch Comments</button>
-            
-            <p id="fetch-error-msg" class="error-msg"></p>
-
-            <button id="remove-btn">Filter Removed Comments</button> 
-
-            <p id="remove-error-msg" class="error-msg"></p>-->
-
-            <!-- Stat Calculations -->
-            <!--
-            <ul id="calcs-list">
-                <li>
-                    <p class="word-count"><span id="word-count">0</span> words counted</p>
-                </li>
-
-                <li>
-                    <p class="comment-count"><span id="comment-count">0</span> comments loaded</p>
-                </li>
-
-                <li>
-                    <p class="words-per-comment">Average of <span id="words-per-comment">0</span> words per comment</p>
-                </li>
-            </ul>
-            -->
-
-            <!-- Stat Calculation Inputs -->
-            <!--<ul id="calcs-inputs-list">
-                <li>
-                    <label class="current-stats-total">Current Stats</label>
-                    <input type="number" class="current-stats" id="current-stats" value="50" autocomplete="off">
-                </li>
-
-                <li>
-                    <label class="base-level">Base Level</label>
-                    <select id="base-level" autocomplete="off">
-                        <option value="base_0">0</option>
-                        <option value="base_1">1</option>
-                        <option value="base_2" selected="selected">2</option>
-                        <option value="base_3">3</option>
-                        <option value="base_4">4</option>
-                        <option value="base_5">5</option>
-                        <option value="base_6">6</option>
-                        <option value="base_7">7</option>
-                        <option value="base_8">8</option>
-                        <option value="base_9">9</option>
-                    </select>
-                </li>
-
-                <li>
-                    <label class="max-stats-total">Max Stats (<span id="max-stats-label-new">0</span>)</label>
-                    <input type="number" class="max-stats" id="max-stats" value="751" autocomplete="off">
-                </li>
-            </ul>-->
 
             <!-- Results -->
-            <p id="statCap-error-msg" class="error-msg">Maximum Boost for a Single Stat is 40%</p>
-            <p id="maxStatCap-error-msg" class="error-msg">Maximum Boost for Total Stats is 75%</p>
-            <p id="stanceCap-error-msg" class="error-msg">Maximum Total Boost for a Stance is 20%</p>
+            <p id="maxStatCap-error-msg" class="error-msg">Max Cap for Total Percentage Boost is <span class="maxPercBoost">0</span>%</p>
+            <p id="physstatCap-error-msg" class="warn-msg">Soft Cap for Percentage Boost for a single stat is <span class="maxPhysBoost">0</span>%</p>
+            <p id="flatTotalCap-error-msg" class="error-msg">Max Cap Total Flat Boost is <span class="maxTotalFlatBoost">0</span></p>
+            <p id="flatCap-error-msg" class="warn-msg">Soft Cap for Flat Boost for a single stat is <span class="maxFlatBoost">0</span></p>
+            <p id="stanceCap-error-msg" class="error-msg">Maximum Percentage Boost for a Stance is <span class="maxStanceBoost">0</span>%</p>
+            <p id="stanceFlatCap-error-msg" class="error-msg">Maximum Flat Boost for a Stance is <span class="maxStanceFlatBoost">0</span></p>
             <p id="stanceLoss-error-msg" class="error-msg">You have not distributed the Stat Loss from your Stance correctly</p>
             <p id="race-error-msg" class="error-msg">Your Race Boosts are too high</p>
             <p id="statCap-warn-msg" class="warn-msg">You have already broken the Boosted Stat Cap</p>
