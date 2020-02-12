@@ -202,8 +202,8 @@ function mainCalcFunction()
         {
             case '0':statLossReduction=0;maxStanceFlatBoost=0;break;
             case '1':statLossReduction=25;maxStanceFlatBoost=5;break;
-            case '2':statLossReduction=50;maxStanceFlatBoost=15;break;
-            case '3':statLossReduction=75;maxStanceFlatBoost=20;break;  
+            case '2':statLossReduction=50;maxStanceFlatBoost=10;break;
+            case '3':statLossReduction=75;maxStanceFlatBoost=15;break;  
                 
             default:statLossReduction=0;break;
         }
@@ -315,7 +315,7 @@ function mainCalcFunction()
             racestr=check(racestr,40);
             if(errorFlag)
                 {
-                    document.getElementById("strRIPF").value=4;
+                    document.getElementById("strRIPF").value=40;
                     errorFlag=false;
                 }
             racespd=check(racespd,maxRacialBoost);
