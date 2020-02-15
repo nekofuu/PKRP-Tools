@@ -119,6 +119,18 @@
                         <option value="SOW">Saijo O Wazamono</option>
                     </select>
                 </li>
+                <li>
+                    <label class="SlashIPL">Enchatment</label>
+                    <select class="SlashIPF IP" id="attEnchantment">
+                        <option value="NON">None</option>
+                        <option value="STA">Stamina</option>
+                        <option value="STR">Strength</option>
+                        <option value="SPD">Speed</option>
+                        <option value="DEX">Dexterity</option>
+                        <option value="WILL">Will</option>
+                    </select>
+                </li>
+                <!--
                 <ul id="hideThisCheck">
                 <br>
                 <li>
@@ -134,6 +146,7 @@
                     <input type="radio" class="SlashIPF IP" id="attNACheck" name="DFUA" value="NA">
                 </li>
                 </ul>
+                -->
             
             </ul>
             
@@ -144,9 +157,9 @@
                         <span class="power" id="attPow"><strong>0</strong></span>
                     </p>
                 </li>
-                <li id="hideThisSoru">
+                <li id="hideThisStatBoost">
                     <p>
-                        <strong>Boosted Speed</strong>
+                        <strong>Boosted <span id="Boosted Stat"></span></strong>
                         <span class="power" id="SoruSpd"><strong>0</strong></span>
                     </p>
                 </li>
@@ -231,6 +244,13 @@
                         <option value="AP5">Armour Perk 5</option>
                     </select>
                 </li><br><br>
+                <li>
+                    <label class="SlashIPL">Enchatment</label>
+                    <select class="SlashIPF IP" id="attEnchantment">
+                        <option value="STA">Stamina</option>
+                        <option value="WILL">Will</option>
+                    </select>
+                </li>
             </ul>
             
 

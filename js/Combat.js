@@ -26,23 +26,23 @@ function calculateAttack()
     var hakiLevel=document.getElementById("attHakiLevel").value;
     var boostedSpeed=document.getElementById("boostedSpeed");
     var meitoGrade=document.getElementById("attbladeGrade").value;
+    var ench=document.getElementById("attEnchantment").value;
     var PowCheck=document.getElementById("attPowCheck").checked;
-    //var curseCheck=document.getElementById("attCurseCheck").checked;
-    var DFCheck=document.getElementById("attDFCheck").checked;
-    var UACheck=document.getElementById("attUACheck").checked;
-    var NACheck=document.getElementById("attNACheck").checked;
+    //var DFCheck=document.getElementById("attDFCheck").checked;
+    //var UACheck=document.getElementById("attUACheck").checked;
+    //var NACheck=document.getElementById("attNACheck").checked;
     var focCheck=document.getElementById("attHaoFoc").checked;
-    //var FMind=document.getElementById("defFMindCheck").checked;
     var attackPower,attackMult,i,lowest=9999;
     var SoruBoost,SoruMult,spdReq,SoruFlat;
     var totalStats=basestm+basestr+basespd+basedex+basewill;
     var baseAtt=0,hakiAtt=0,HakiFlat=0,powerAtt=0,powerFlat=0,MeitoAtt=0,MeitoFlat=0,curseAtt=0,curseFlat,attBoost,flatBoost;
     var stats=[basestr,basespd,basedex,basewill];
-    var baseFactor=.01
-    var strFactor=.325;
-    var spdFactor=.1;
-    var dexFactor=.280;
-    var willFactor=.145;
+    var baseFactor=.01, boostedStat, statBoosted="";
+    var stamBoost=0;
+    var strFactor=.325, strBoost=0;
+    var spdFactor=.1, spdBoost=0;
+    var dexFactor=.280, dexBoost=0;
+    var willFactor=.145, willBoost=0;
     var overflow=.25,sloverflow=.10,maxAttMult=60,maxFlatBoost=60;
     var thr=700,soruThr,HakiThr,Haki2Thr,restype;
     var HaoMult,totalDrain,focHao=1,maxDrain,minDrain,willReq,maxPerc,HakiMult,ryouMult,extraWill;
@@ -52,24 +52,24 @@ function calculateAttack()
     }
     switch(attackLevel)
         {
-            case "NS":baseAtt=1.00;restype="AttMeitoFS";break;
-            case "IW1":baseAtt=.30;thr=100;restype="AttMeitoFS";break;
-            case "IW2":baseAtt=.45;thr=180;restype="AttMeitoFS";break;
-            case "IW3":baseAtt=.60;thr=260;restype="AttMeitoFS";break;
-            case "IW4":baseAtt=.75;thr=340;restype="AttMeitoFS";break;
-            case "IW5":baseAtt=.90;thr=420;restype="AttMeitoFS";break;
-            case "FS1":baseAtt=.35;thr=100;restype="AttMeitoFS";break;
-            case "FS2":baseAtt=.50;thr=200;restype="AttMeitoFS";break;
-            case "FS3":baseAtt=.65;thr=300;restype="AttMeitoFS";break;
-            case "FS4":baseAtt=.80;thr=400;restype="AttMeitoFS";break;
-            case "FS5":baseAtt=.95;thr=500;restype="AttMeitoFS";break;
-            case "FSS":baseAtt=.95;restype="AttMeitoFS";break;
-            case "FSP":baseAtt=1.10;restype="AttMeitoFS";break;
-            case "SO1":baseAtt=1.00;SoruFlat=10;SoruMult=0.20;spdReq=70;soruThr=100;restype="Soru";break;
-            case "SO2":baseAtt=1.00;SoruFlat=20;SoruMult=0.25;spdReq=135;soruThr=200;restype="Soru";break;
-            case "SO3":baseAtt=1.00;SoruFlat=30;SoruMult=0.30;spdReq=200;soruThr=300;restype="Soru";break;
-            case "SOS":baseAtt=1.00;SoruFlat=30;SoruMult=0.30;spdReq=200;soruThr=400;restype="Soru";break;
-            case "SOP":baseAtt=1.00;SoruFlat=40;SoruMult=0.35;spdReq=265;soruThr=400;restype="Soru";break;
+            case "NS":baseAtt=1.00;restype="AttMeito";break;
+            case "IW1":baseAtt=.30;thr=100;restype="AttMeito";break;
+            case "IW2":baseAtt=.45;thr=180;restype="AttMeito";break;
+            case "IW3":baseAtt=.60;thr=260;restype="AttMeito";break;
+            case "IW4":baseAtt=.75;thr=340;restype="AttMeito";break;
+            case "IW5":baseAtt=.90;thr=420;restype="AttMeito";break;
+            case "FS1":baseAtt=.35;thr=100;restype="AttMeito";break;
+            case "FS2":baseAtt=.50;thr=200;restype="AttMeito";break;
+            case "FS3":baseAtt=.65;thr=300;restype="AttMeito";break;
+            case "FS4":baseAtt=.80;thr=400;restype="AttMeito";break;
+            case "FS5":baseAtt=.95;thr=500;restype="AttMeito";break;
+            case "FSS":baseAtt=.95;restype="AttMeito";break;
+            case "FSP":baseAtt=1.10;restype="AttMeito";break;
+            case "SO1":baseAtt=1.00;SoruFlat=10;SoruMult=0.20;spdReq=70;soruThr=100;restype="Stat";break;
+            case "SO2":baseAtt=1.00;SoruFlat=20;SoruMult=0.25;spdReq=135;soruThr=200;restype="Stat";break;
+            case "SO3":baseAtt=1.00;SoruFlat=30;SoruMult=0.30;spdReq=200;soruThr=300;restype="Stat";break;
+            case "SOS":baseAtt=1.00;SoruFlat=30;SoruMult=0.30;spdReq=200;soruThr=400;restype="Stat";break;
+            case "SOP":baseAtt=1.00;SoruFlat=40;SoruMult=0.35;spdReq=265;soruThr=400;restype="Stat";break;
             case "SH1":baseAtt=1.05;restype="Att";break;
             case "SH2":baseAtt=1.10;restype="Att";break;
             case "SH3":baseAtt=1.15;restype="Att";break;
@@ -94,14 +94,22 @@ function calculateAttack()
                 
             default:baseAtt=0;break;
         }
-    
-    if(restype.includes("Soru"))
+    switch(ench)
         {
-            document.getElementById("hideThisSoru").style.display="";
+            case "STA": basestm+=(totalStats*.030);boostedStat=basestm;statBoosted="Stamina";restype+="Stat";break;
+            case "STR": basestr+=(totalStats*.030);boostedStat=basestr;statBoosted="Strength";restype+="Stat";break;
+            case "SPD": basespd+=(totalStats*.030);boostedStat=basespd;statBoosted="Speed";restype+="Stat";break;
+            case "DEX": basedex+=(totalStats*.030);boostedStat=basedex;statBoosted="Dexterity";restype+="Stat";break;
+            case "WILL": basewill+=(totalStats*.030);boostedStat=basewill;statBoosted="Will";restype+="Stat";break;
+            default:break;
+        }
+    if(restype.includes("Stat"))
+        {
+            document.getElementById("hideThisStatBoost").style.display="";
         }
     else
         {
-            document.getElementById("hideThisSoru").style.display="none";            
+            document.getElementById("hideThisStatBoost").style.display="none";            
         }
     if(restype.includes("Att"))
         {
@@ -122,7 +130,6 @@ function calculateAttack()
     if(restype.includes("Hao"))
         {
             document.getElementById("hideThisHao").style.display="";
-            //document.getElementById("hideThisHao2").style.display="";
             document.getElementById("hideThisHaoCheck").style.display="";
         }
     else
@@ -142,6 +149,7 @@ function calculateAttack()
             document.getElementById("attbladeGrade").disabled=true;
             meitoGrade=document.getElementById("attbladeGrade").value;
         }
+    /*
     if(restype.includes("FS"))
        {
             document.getElementById("hideThisCheck").style.display="";
@@ -150,12 +158,18 @@ function calculateAttack()
        {
             document.getElementById("hideThisCheck").style.display="none";
        }
-    SoruBoost=(spdReq+basespd)*SoruMult+SoruFlat;
-    if(SoruBoost>soruThr)
+       */
+    if(attackLevel.includes("SO"))
         {
-            SoruBoost=(SoruBoost-soruThr)*overflow+soruThr;
+            SoruBoost=(spdReq+basespd)*SoruMult+SoruFlat;
+            if(SoruBoost>soruThr)
+                {
+                    SoruBoost=(SoruBoost-soruThr)*overflow+soruThr;
+                }
+            statBoosted="Speed"
+            boostedStat=basespd+SoruBoost;
         }
-    document.getElementById("SoruSpd").textContent=Math.round(basespd+SoruBoost);
+    document.getElementById("SoruSpd").textContent=Math.round(boostedStat);
     
     if(!focCheck)
        focHao=.55;
@@ -173,6 +187,7 @@ function calculateAttack()
         }
     totalDrain=totalDrain*focHao;
     document.getElementById("HaoRes").textContent=Math.round(totalDrain);
+    document.getElementById("Boosted Stat").textContent=statBoosted
     
     switch(hakiLevel)
         {
@@ -211,6 +226,7 @@ function calculateAttack()
         {
             attackMult=(attackMult-maxAttMult)*overflow+maxAttMult;
         }
+    /*
     if(DFCheck)         //&&(attackLevel.includes("FS")
         {
             MeitoFlat*=0.2;
@@ -219,6 +235,7 @@ function calculateAttack()
         {
             MeitoFlat*=0.6;
         }
+    */
     flatBoost=powerFlat+HakiFlat+MeitoFlat;
     if(flatBoost>maxFlatBoost)
         {
@@ -253,7 +270,6 @@ function calculateDefense()
     var atthakiLevel=document.getElementById("attHakiLevel").value;
     var attackLevel=document.getElementById("attattackLevel").value;
     var FullCheck=document.getElementById("defFullCheck").value;
-    //var BSCheck=document.getElementById("defBMCheck").checked;
     var innDef,armDef=0,maxArmor,armSources,innSources,spdRed,armPerk,fullPart=1;
     var statDef,HakiMult,TekkaiMult,HakiMin,TekkaiMin,HakiBoost,TekkaiBoost,HakiFlat,TekkaiFlat,willReq,stamReq,ArmHakiBoost,armDmg;
     var stamFactor=.1,willFactor=0;
