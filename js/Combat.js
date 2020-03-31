@@ -254,7 +254,7 @@ function calculateAttack()
     basedex=adjStat(basedex,lowest,basestr);
     basewill=adjStat(basewill,lowest,basestr);
     totalStats=basestm+basestr+basespd+basedex+basewill;
-    //thr=[lowest*10,basestr*5,thr].sort(function(a,b){return a-b})[0];
+    thr=[basestr*5,thr].sort(function(a,b){return a-b})[0];
     console.log(totalStats)
     attackPower=(strFactor*basestr+spdFactor*basespd+dexFactor*basedex+willFactor*basewill+totalStats*baseFactor+flatBoost)*baseAtt+attackMult/10*totalStats+10;
     if(attackPower>thr)
