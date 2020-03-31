@@ -744,21 +744,30 @@ function mainCalcFunction()
                 }
     
     
-            totalStamBoost+=racestam;
-            totalStrBoost+=racestr;
-            totalSpdBoost+=racespd;
-            totalDexBoost+=racedex;
-            totalWillBoost+=racewill;
+            //totalStamBoost+=racestam;
+            //totalStrBoost+=racestr;
+            //totalSpdBoost+=racespd;
+            //totalDexBoost+=racedex;
+            //totalWillBoost+=racewill;
     
-    /*basetotal=Math.round
+    basestam+=basetotal/10*(racestam/100)+racestam/2;
+    basestr+=basetotal/10*(racestr/100)+racestr/2;
+    basespd+=basetotal/10*(racespd/100)+racespd/2;
+    basedex+=basetotal/10*(racedex/100)+racedex/2;
+    basewill+=basetotal/10*(racewill/100)+racewill/2;
+    
+    basetotal=basestam+basestr+basestam+basedex+basewill
+    /*
+    basetotal=Math.round
     (check(basestam+basetotal*(racestam/100),maxBoostPhysStatAmt)+
      check(basestr+basetotal*(racestr/100),maxBoostPhysStatAmt)+
      check(basespd+basetotal*(racespd/100),maxBoostPhysStatAmt)+
      check(basedex+basetotal*(racedex/100),maxBoostPhysStatAmt)+
      check(basewill+basetotal*(racewill/100),maxBoostPhysStatAmt));
-    //Updating base Total to Include Racials so that it reflects in boosts
-    //Update: Pretty Pointless, difference is miniscule
+    
+    errorFlag=false;
     */
+    
             if(totalBoost>maxTotalBoost)
                 {
                     document.getElementById("maxStatCap-error-msg").style.display="";
