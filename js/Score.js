@@ -341,6 +341,7 @@ function changeDate() {
         let day = (`0${end.getUTCDate()}`).slice(-2);
         let endString = `${year}-${month}-${day}`;
         endDate.value = endString;
+        fetchMaxStats();
     }
     //fetchMaxStats();
 }
