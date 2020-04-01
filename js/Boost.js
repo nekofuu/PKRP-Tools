@@ -744,19 +744,19 @@ function mainCalcFunction()
                 }
     
     
-            //totalStamBoost+=racestam;
-            //totalStrBoost+=racestr;
-            //totalSpdBoost+=racespd;
-            //totalDexBoost+=racedex;
-            //totalWillBoost+=racewill;
+            totalStamBoost+=racestam;
+            totalStrBoost+=racestr;
+            totalSpdBoost+=racespd;
+            totalDexBoost+=racedex;
+            totalWillBoost+=racewill;
     
-    basestam+=basetotal/10*(racestam/100)+racestam/2;
-    basestr+=basetotal/10*(racestr/100)+racestr/2;
-    basespd+=basetotal/10*(racespd/100)+racespd/2;
-    basedex+=basetotal/10*(racedex/100)+racedex/2;
-    basewill+=basetotal/10*(racewill/100)+racewill/2;
+    //basestam+=basetotal/10*(racestam/100)+racestam/2;
+    //basestr+=basetotal/10*(racestr/100)+racestr/2;
+    //basespd+=basetotal/10*(racespd/100)+racespd/2;
+    //basedex+=basetotal/10*(racedex/100)+racedex/2;
+    //basewill+=basetotal/10*(racewill/100)+racewill/2;
     
-    basetotal=basestam+basestr+basestam+basedex+basewill
+    basetotal=basestam+basestr+basespd+basedex+basewill;
     /*
     basetotal=Math.round
     (check(basestam+basetotal*(racestam/100),maxBoostPhysStatAmt)+
@@ -880,8 +880,8 @@ function mainCalcFunction()
                     document.getElementById("new-dex").style.color="yellow";
                     errorFlag=false;
                 }
-
-            finalwill=Math.round(check(check(basewill+(totalWillBoost*basetotal/10)/100,maxBoostPhysStatAmt)+totalWillFlatBoost,maxBoostPhysStatAmt)-otherwillLoss,maxBoostPhysStatAmt);
+    
+           finalwill=Math.round(check(check(basewill+(totalWillBoost*basetotal/10)/100,maxBoostPhysStatAmt)+totalWillFlatBoost,maxBoostPhysStatAmt)-otherwillLoss,maxBoostPhysStatAmt);
             if(errorFlag)
                 {
                     document.getElementById("statCap-warn-msg").style.display="";
