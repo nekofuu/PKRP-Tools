@@ -57,7 +57,7 @@ let tempCommentCount = 0;
 let commentsLoaded = 0;
 let commentsRemoved = false;
 let posts = [];
-let str,stm,spd,dex,will,currentReserveScore;
+let str,stm,spd,dex,will,currentReserveScore,stri;
 
 // Event Listeners
 fetchBtn.addEventListener("click", fetchComments);
@@ -68,9 +68,7 @@ username.addEventListener('change', () => {
     fetchUserStats();
 });
 window.addEventListener('load', winLoad);
-//baseLevel.addEventListener('change', changeStartingStats);
 maxStats.addEventListener('change', calculateMaxStats);
-maxStats.addEventListener('change', changeStartingStats);
 
 // Window Load Function
 function winLoad() {
@@ -166,7 +164,6 @@ function fetchMaxStats() {
                     if (max) {
                         maxStats.valueAsNumber = max;
                         calculateMaxStats();
-                        changeStartingStats();
                         return;
                     }
                 } else {
@@ -176,7 +173,6 @@ function fetchMaxStats() {
             else {
                 logError(maxErrorMsg, "Error Fetching Max from Google - Using Default");
                 calculateMaxStats();
-                changeStartingStats();
                 return;
             }
         }
@@ -193,7 +189,6 @@ function fetchMaxStats() {
         logError(maxErrorMsg, "Error Fetching Max from Google - Using Default");
         console.log(`Error ${request.status}: ${request.statusText}`);
         calculateMaxStats();
-        changeStartingStats();
         return;
     }
 }
@@ -223,13 +218,14 @@ function calculateMaxStats() {
         maxNewStats = calc.newStats;
         maxStatsLabelNew.textContent = maxNewStats;
     }
+    if(!username.value)
+        {
+            changeStartingStats();
+        }
 }
 
 // Change starting Stats based on base
 function changeStartingStats() {
-    //Calculate Max Stats since base is changed
-    calculateMaxStats();
-    //currentStats.value = 50 * (parseInt(baseLevel.options[baseLevel.selectedIndex].textContent) + 1);
     currentStats.value = (50+Math.floor((maxStats.valueAsNumber-50)/100)*25)
 }
 // Automatically fetch the max stats from the stats sheet
@@ -261,29 +257,44 @@ function fetchUserStats() {
     request.timeout = 5000;
 
     request.send();
-    
+
     request.onreadystatechange = function() {
         if (request.readyState == XMLHttpRequest.DONE) {
             if (request.status === 200) {
                 // Good response
+                stri="gsx$fort"+new Date(endDate.value).toUTCString().substr(5,11).replace(" ","").replace(" ","").toLowerCase();
                 let data = JSON.parse(request.response).feed.entry;
                 let entry = data.findIndex((e) => {
                     return (e.gsx$racialboost.$t.localeCompare(username.value, 'en', {sensitivity: 'base'}) === 0)
                 });
+                //console.log(data[entry])
                 if (entry) {
-                    currentStats.value = Number(data[entry].gsx$currentstats.$t);
-                    stm=Number(data[entry+1].gsx$currentstats.$t);
-                    str=Number(data[entry+2].gsx$currentstats.$t);
-                    spd=Number(data[entry+3].gsx$currentstats.$t);
-                    dex=Number(data[entry+4].gsx$currentstats.$t);
-                    will=Number(data[entry+5].gsx$currentstats.$t);
-                    currentReserveScore=Number(data[entry+6].gsx$currentstats.$t);
+                    if(data[0][stri])
+                        {
+                            stm=getRowTotalUptoDate(data[entry+1],stri);
+                            str=getRowTotalUptoDate(data[entry+2],stri);
+                            spd=getRowTotalUptoDate(data[entry+3],stri);
+                            dex=getRowTotalUptoDate(data[entry+4],stri);
+                            will=getRowTotalUptoDate(data[entry+5],stri);
+                            currentReserveScore=getRowTotalUptoDate(data[entry+6],stri)
+                            currentStats.value = stm + str + spd + dex + will;
+                        }
+                    else
+                    {
+                        currentStats.value = Number(data[entry].gsx$currentstats.$t);
+                        stm=Number(data[entry+1].gsx$currentstats.$t);
+                        str=Number(data[entry+2].gsx$currentstats.$t);
+                        spd=Number(data[entry+3].gsx$currentstats.$t);
+                        dex=Number(data[entry+4].gsx$currentstats.$t);
+                        will=Number(data[entry+5].gsx$currentstats.$t);
+                        currentReserveScore=Number(data[entry+6].gsx$currentstats.$t);
+                    }
                     fetchComments();
                 } else {
                     logError(statsErrorMsg, "Error Fetching User's Stats. Check spelling or enter stats manually");
                     fetchBtn.disabled = false;
                 }
-                return;
+                //return;
             } else {
                 logError(statsErrorMsg, "Error Fetching User's Stats from Google");
                 fetchBtn.disabled = false;
@@ -291,7 +302,6 @@ function fetchUserStats() {
             }
         }
     }
-    
     request.onabort = function() {
         logError(statsErrorMsg, "Fetching User's Stats Aborted");
         calculateMaxStats();
@@ -316,7 +326,6 @@ function updateCalcValues(calc) {
 }
 
 startDate.addEventListener('change', changeDate);
-endDate.addEventListener('change', fetchMaxStats);
 
 function changeDate() {
     // Every time the start date is changed, check to see if
@@ -342,8 +351,8 @@ function changeDate() {
         let endString = `${year}-${month}-${day}`;
         endDate.value = endString;
         fetchMaxStats();
+        fetchUserStats();
     }
-    //fetchMaxStats();
 }
 
 manualScore.addEventListener('change', () => {
@@ -503,6 +512,25 @@ function filter(response) {
         removeBtn.disabled = false;
         filterPosts();
     }
+}
+
+function getRowTotalUptoDate(row,date)
+{
+    var res=0;
+    for(var cell in row)
+        {
+            
+            if(cell==date)
+                {
+                    break;
+                }
+            if(!(cell.startsWith("gsx$fort")||(cell=="gsx$originalstats")))
+                {
+                    continue;
+                }
+            res+=Number(row[cell]["$t"]);
+        }
+    return res;
 }
 
 function processComments(response) {
@@ -685,12 +713,339 @@ function countWords(str) {
     return words;
 }
 
+const MAX_RESERVE_SCORE = 5;
+const MAX_TOTAL_RESERVE = 50;
+const WORD_REQUIREMENT = 100;
+const TOTAL_WORDS_REQ = 5100;
+//const WORDS_PER_POINT = 170;
+
+calcBtn.addEventListener('click', () => {
+    //updateCalcValues(calculate(currentStats.valueAsNumber, manualScore.valueAsNumber));
+    updateCalcValues(calculate(currentStats.valueAsNumber, maxStats.valueAsNumber, manualScore.valueAsNumber, maxScore.valueAsNumber));
+});
+
+function updateScore() {
+    var MAX_STAT_SCORE = maxScore.valueAsNumber;
+    var MIN_SCORE = maxScore.valueAsNumber*0.40;
+    var WORDS_PER_POINT = 5100/(MAX_STAT_SCORE-MIN_SCORE);
+    var NORMAL_SCORE_RATE = 5100/30;
+    // Get a temporary score by dividing word count by WORDS_PER_POINT
+    //tempScore = Math.floor(tempWordCount / WORDS_PER_POINT);
+    // If the player has written at least 100 words, they can get the minimum score of 20
+    let tempScore = 0;
+    let earnedReserveScore = 0;
+    if (tempWordCount >= WORD_REQUIREMENT) {
+        // Calculate Score
+        tempScore = MIN_SCORE + Math.floor(tempWordCount / WORDS_PER_POINT);
+        earnedReserveScore = (tempScore - MAX_STAT_SCORE)/(5100/(MAX_STAT_SCORE-MIN_SCORE)/NORMAL_SCORE_RATE);
+        // If score is above MAX_STAT_SCORE, set it equal to max score
+        if (tempScore > MAX_STAT_SCORE) {
+            tempScore = MAX_STAT_SCORE;
+        }
+        if(earnedReserveScore < 0)
+            {
+                earnedReserveScore = 0
+            }
+        if(earnedReserveScore > MAX_RESERVE_SCORE)
+            {
+                earnedReserveScore = MAX_RESERVE_SCORE;
+            }
+        if((currentReserveScore + earnedReserveScore) > MAX_TOTAL_RESERVE)
+            {
+                earnedReserveScore = MAX_TOTAL_RESERVE - currentReserveScore
+            }
+    } else {
+        logError(statsErrorMsg, `Player did not write ${WORD_REQUIREMENT} words, 0 points awarded!`);
+        tempScore = 0;
+        earnedReserveScore = 0;
+    }
+    
+    score.textContent = tempScore;
+    manualScore.value = tempScore;
+    earnedReserve.textContent = earnedReserveScore;
+    totalReserve.textContent =  currentReserveScore + earnedReserveScore;
+}
+
+function calculate(currStats,maxStats,earnedScore=20,maxScore=50)
+{
+    let returnVal = {
+        earnedStats: 0,
+        earnedSplit: "",
+        newStats: 0,
+        //newBase: base
+    }
+    var currentStatsCopy=currStats;
+    var earnedScoreCopy=earnedScore;
+    var maxStatsCopy=maxStats;
+    var maxScoreCopy=maxScore;
+    var baseRate=0.50, boostRate=0.20, acceleRate, diffBoostRate;
+    var earnedStas;
+    var startingStats=(50+Math.floor((maxStats-50)/100)*25)
+    if(currStats < startingStats)
+        {
+            currStats = startingStats;
+        }
+    if(currStats < maxStats)
+        {
+            diffBoostRate=(maxStats-currStats)/200
+            acceleRate=boostRate*(earnedScoreCopy/maxScore);
+        }
+    else
+        {
+            diffBoostRate=0;
+            acceleRate=0;
+        }
+    while(earnedScore>0)
+        {
+            if(currStats < maxStats)
+                {
+                    diffBoostRate=(maxStats-currStats)/200
+                    acceleRate=boostRate*(earnedScoreCopy/maxScore);
+                }
+            else
+                {
+                    diffBoostRate=0;
+                    acceleRate=0;
+                }
+            currStats+=(baseRate + diffBoostRate + acceleRate);
+            maxStats+=baseRate;
+            if(currStats > maxStats)
+                {
+                    currStats = maxStats;
+                }
+            earnedScore--;
+        }
+    maxStats=maxStatsCopy
+    maxScoreCopy=maxScore;
+    while(maxScore)
+        {
+            maxStats+=baseRate;
+            maxScore--;
+        }
+    if(currStats > maxStats)
+        {
+            currStats = maxStats;
+        }
+    currStats=Math.floor(currStats);
+    //maxStats=Math.floor(maxStats);
+    earnedStas=currStats-currentStatsCopy;
+    
+    returnVal.earnedStats=currStats-currentStatsCopy
+    if((stm)&&(str)&&(spd)&&(dex)&&(will)&&(stm+str+spd+dex+will==currentStatsCopy))
+        {
+            returnVal.earnedSplit=`(${Math.round((currentStatsCopy+returnVal.earnedStats) * 0.6-(stm+str+spd))}/${Math.round((currentStatsCopy+returnVal.earnedStats) * 0.4-(dex+will))})`;
+        }
+    else
+    {
+        returnVal.earnedSplit = `(${Math.round(earnedStas * 0.6)}/${Math.round(earnedStas * 0.4)})`;
+    }
+    
+    returnVal.newStats = currStats;
+    
+    return returnVal;
+    
+}
+
+function resetStatValues() {
+    score.textContent = '0';
+    earnedStats.textContent = '0';
+    earnedSplit.textContent = '(0/0)';
+    newStats.textContent = '0';
+}
+
+
+
+/*
+/
+/   CONSOLE FUNCTIONS
+/
+/
+*/
+
+
+function WhenWillICatchUp(maxStats,startingStats=-1,score=50)
+{
+    var maxStatCopy=maxStats
+    if(startingStats==-1)
+        {
+            startingStats=(50+Math.floor((maxStats-50)/100)*25)
+        } 
+    var res1, res2, res3, res4;
+    res1 = res2 = res3 = res4 = ""
+    while (startingStats<maxStats)
+        {
+            if((startingStats>=maxStats*.50)&&res1=="")
+                {
+                    res1="50%: "+(maxStats-maxStatCopy)/25+" Forts | "+maxStats+ "\n"
+                }
+            if((startingStats>=maxStats*.75)&&res2=="")
+                {
+                    res2="75%: "+(maxStats-maxStatCopy)/25+" Forts | "+maxStats+ "\n"
+                }
+            if((startingStats>=maxStats*.95)&&res3=="")
+                {
+                    res3="95%: "+(maxStats-maxStatCopy)/25+" Forts | "+maxStats+ "\n"
+                }
+            startingStats=calculate(startingStats,maxStats,score,50).newStats;
+            maxStats=calculate(maxStats,maxStats,50,50).newStats;
+            if(maxStats>2500)
+                {
+                    res4+="100%: >2500 Stats"
+                    return res1+res2+res3+res4;
+                }
+        }
+    res4+="100%: "+(maxStats-maxStatCopy)/25+" Forts | "+maxStats+ "\n";
+    return res1+res2+res3+res4;
+}
+
+function getFortResults(number=50)
+{
+    let eachResult
+    let result=[]
+    let sheetID = "11DBV69f-U9T1EXbdI_AvjHpp7XzSs38fH9eKqdx2sUw";
+    // JOEY'S SHEET FOR DEBUGGING
+    //let sheetID = "10bBzQNryutYgx49QEb2Vz19alL55lS_hEJ-FrJTOIFE";
+    let url = `https://spreadsheets.google.com/feeds/list/${sheetID}/1/public/full?alt=json`;
+
+    let request = new XMLHttpRequest();
+    
+    request.ontimeout = () => {
+        logError(statsErrorMsg, `Error - Timed Out while getting Fort Results. Please manually do so manually.`);
+    };
+
+    request.open('GET', url);
+    request.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+
+    request.timeout = 5000;
+
+    request.send();
+    
+    request.onreadystatechange = async function() {
+        if (request.readyState == XMLHttpRequest.DONE) {
+            if (request.status === 200) {
+                // Good response
+                let data = JSON.parse(request.response).feed.entry;
+                for(i=0;i<number;i++)
+                    {
+                        username.value=data[i]["gsx$username"]["$t"]
+                        fetchUserStats();
+                        await sleep(10000);
+                        eachResult=username.value+"\t"+score.innerHTML+"\t"+earnedStats.innerHTML+"\tReserve:"+earnedReserve.innerHTML;
+                        result[i]=eachResult;
+                        /*
+                        result[i]={
+                                    User: usernames[i],
+                                    Score: score.innerHTML,
+                                    Split: earnedSplit.innerHTML,
+                                    Reserve: earnedReserve.innerHTML,
+                                  }
+                        */
+                        console.log(eachResult)
+                    }
+                console.log(result)
+            }
+            else {
+                logError(maxErrorMsg, "Error Getting Usernames from Google");
+                return;
+            }
+        }
+    }
+
+    
+    request.onabort = function() {
+        logError(maxErrorMsg, "Get Fort Results Aborted");
+        calculateMaxStats();
+        return;
+    }
+
+    request.onerror = function() {
+        logError(maxErrorMsg, "Error Getting Usernames from Google");
+        console.log(`Error ${request.status}: ${request.statusText}`);
+        return;
+    }
+}
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 /*
  *
- * STAT CALCULATIONS
+ * OLD STAT CALCULATIONS AND OLD FUNCTIONS
  * 
  */
 
+/*
+function oldfetchUserStats() {
+    // Remove stats error because we're getting a new username and new stats
+    statsErrorMsg.classList.remove('show');
+
+    // Reset individual stats
+    str = stm = spd = dex = will = currentReserveScore = null;
+
+    // GET PAGE ID FROM HERE WHEN PUBLISHED
+    // https://spreadsheets.google.com/feeds/cells/SHEET_ID/od6/public/full?alt=json
+    let sheetID = "11DBV69f-U9T1EXbdI_AvjHpp7XzSs38fH9eKqdx2sUw";
+
+    let url = `https://spreadsheets.google.com/feeds/list/${sheetID}/2/public/full?alt=json`;
+    let request = new XMLHttpRequest();
+    
+    request.ontimeout = () => {
+        logError(statsErrorMsg, `Error - Timed Out while fetching user's stats. Please manually input current stats.`);
+        fetchBtn.disabled = false;
+    };
+
+    request.open('GET', url);
+    request.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+
+    request.timeout = 5000;
+
+    request.send();
+    
+    request.onreadystatechange = function() {
+        if (request.readyState == XMLHttpRequest.DONE) {
+            if (request.status === 200) {
+                // Good response
+                let data = JSON.parse(request.response).feed.entry;
+                let entry = data.findIndex((e) => {
+                    return (e.gsx$racialboost.$t.localeCompare(username.value, 'en', {sensitivity: 'base'}) === 0)
+                });
+                if (entry) {
+                    currentStats.value = Number(data[entry].gsx$currentstats.$t);
+                    stm=Number(data[entry+1].gsx$currentstats.$t);
+                    str=Number(data[entry+2].gsx$currentstats.$t);
+                    spd=Number(data[entry+3].gsx$currentstats.$t);
+                    dex=Number(data[entry+4].gsx$currentstats.$t);
+                    will=Number(data[entry+5].gsx$currentstats.$t);
+                    currentReserveScore=Number(data[entry+6].gsx$currentstats.$t);
+                    fetchComments();
+                } else {
+                    logError(statsErrorMsg, "Error Fetching User's Stats. Check spelling or enter stats manually");
+                    fetchBtn.disabled = false;
+                }
+                return;
+            } else {
+                logError(statsErrorMsg, "Error Fetching User's Stats from Google");
+                fetchBtn.disabled = false;
+                return;
+            }
+        }
+    }
+    
+    request.onabort = function() {
+        logError(statsErrorMsg, "Fetching User's Stats Aborted");
+        calculateMaxStats();
+        fetchBtn.disabled = false;
+        return;
+    }
+
+    request.onerror = function() {
+        logError(statsErrorMsg, "Error Fetching User's Stats from Google");
+        console.log(`Error ${request.status}: ${request.statusText}`);
+        calculateMaxStats();
+        fetchBtn.disabled = false;
+        return;
+    }
+}
  // Object to hold the different thresholds at different base values
  var baseLevels = {
     //threshold = levelTable.low
@@ -1090,58 +1445,6 @@ function countWords(str) {
     }]  //DONE
 };
 
-const MAX_RESERVE_SCORE = 5;
-const MAX_TOTAL_RESERVE = 50;
-const WORD_REQUIREMENT = 100;
-const TOTAL_WORDS_REQ = 5100;
-//const WORDS_PER_POINT = 170;
-
-calcBtn.addEventListener('click', () => {
-    //updateCalcValues(calculate(currentStats.valueAsNumber, manualScore.valueAsNumber));
-    updateCalcValues(calculate(currentStats.valueAsNumber, maxStats.valueAsNumber, manualScore.valueAsNumber, maxScore.valueAsNumber));
-});
-
-function updateScore() {
-    var MAX_STAT_SCORE = maxScore.valueAsNumber;
-    var MIN_SCORE = maxScore.valueAsNumber*0.40;
-    var WORDS_PER_POINT = 5100/(MAX_STAT_SCORE-MIN_SCORE);
-    var NORMAL_SCORE_RATE = 5100/30;
-    // Get a temporary score by dividing word count by WORDS_PER_POINT
-    //tempScore = Math.floor(tempWordCount / WORDS_PER_POINT);
-    // If the player has written at least 100 words, they can get the minimum score of 20
-    let tempScore = 0;
-    let earnedReserveScore = 0;
-    if (tempWordCount >= WORD_REQUIREMENT) {
-        // Calculate Score
-        tempScore = MIN_SCORE + Math.floor(tempWordCount / WORDS_PER_POINT);
-        earnedReserveScore = (tempScore - MAX_STAT_SCORE)/(5100/(MAX_STAT_SCORE-MIN_SCORE)/NORMAL_SCORE_RATE);
-        // If score is above MAX_STAT_SCORE, set it equal to max score
-        if (tempScore > MAX_STAT_SCORE) {
-            tempScore = MAX_STAT_SCORE;
-        }
-        if(earnedReserveScore < 0)
-            {
-                earnedReserveScore = 0
-            }
-        if(earnedReserveScore > MAX_RESERVE_SCORE)
-            {
-                earnedReserveScore = MAX_RESERVE_SCORE;
-            }
-        if((currentReserveScore + earnedReserveScore) > MAX_TOTAL_RESERVE)
-            {
-                earnedReserveScore = MAX_TOTAL_RESERVE - currentReserveScore
-            }
-    } else {
-        logError(statsErrorMsg, `Player did not write ${WORD_REQUIREMENT} words, 0 points awarded!`);
-        tempScore = 0;
-        earnedReserveScore = 0;
-    }
-    
-    score.textContent = tempScore;
-    manualScore.value = tempScore;
-    earnedReserve.textContent = earnedReserveScore;
-    totalReserve.textContent =  currentReserveScore + earnedReserveScore;
-}
 
 function calculateOld(stats, score, getMax = false, base = baseLevel.selectedIndex, max = maxStats.valueAsNumber, maxNew = Number(maxStatsLabelNew.textContent), logErrors = true) {
     // Return value with all the different information we may need
@@ -1267,24 +1570,8 @@ function calculateOld(stats, score, getMax = false, base = baseLevel.selectedInd
     returnVal.newStats = stats + earnedRounded;
     return returnVal;
 }
-
-function resetStatValues() {
-    score.textContent = '0';
-    earnedStats.textContent = '0';
-    earnedSplit.textContent = '(0/0)';
-    newStats.textContent = '0';
-}
-
-
-
-/*
-/
-/   TESTING
-/
-/
-*/
-
 function catchUp(first, newbie, max = 0) {
+    console.log(1)
     let firstNew = 0;
     let newbieNew = 0;
     let maxNew = 0;
@@ -1369,6 +1656,7 @@ let thread = {}
 let fakeElement = document.createElement('p');
 // Take a link to a thread and count the number of words total in the thread
 function checkThread(link) {
+    console.log(1)
     thread = {
         link: "",
         words: 0,
@@ -1382,6 +1670,7 @@ function checkThread(link) {
 }
 
 function processThread(response) {
+    console.log(1)
     let comment = response[1].data.children[0].data;
 
     let post = {};
@@ -1401,6 +1690,7 @@ function processThread(response) {
 }
 
 function countThread() {
+    console.log(1)
     // Iterate through each comment from thread object and get word count
     
     for (let i in thread.posts) {
@@ -1434,227 +1724,5 @@ function countThread() {
     
     console.log("Thread processed!");
 }
-
-
-function calculate(currStats,maxStats,earnedScore=20,maxScore=50)
-{
-    let returnVal = {
-        earnedStats: 0,
-        earnedSplit: "",
-        newStats: 0,
-        //newBase: base
-    }
-    var currentStatsCopy=currStats;
-    var earnedScoreCopy=earnedScore;
-    var maxStatsCopy=maxStats;
-    var maxScoreCopy=maxScore;
-    var baseRate=0.50, boostRate=0.20, acceleRate, diffBoostRate;
-    var earnedStas;
-    var startingStats=(50+Math.floor((maxStats-50)/100)*25)
-    if(currStats < startingStats)
-        {
-            currStats = startingStats;
-        }
-    //maxStats+=maxScore*baseRate
-    if(currStats < maxStats)
-        {
-            diffBoostRate=(maxStats-currStats)/200
-            acceleRate=boostRate*(earnedScoreCopy/maxScore);
-            /*
-            if(earnedScoreCopy == maxScore)
-                {
-                    acceleRate=boostRate;
-                }
-            else
-                {
-                    acceleRate=0;
-                }
-            */
-        }
-    else
-        {
-            diffBoostRate=0;
-            acceleRate=0;
-        }
-    while(earnedScore>0)
-        {
-            if(currStats < maxStats)
-                {
-                    diffBoostRate=(maxStats-currStats)/200
-                    acceleRate=boostRate*(earnedScoreCopy/maxScore);
-                    /*
-                    if(earnedScoreCopy == maxScore)
-                        {
-                            acceleRate=boostRate;
-                        }
-                    else
-                        {
-                            acceleRate=0;
-                        }
-                    */
-                }
-            else
-                {
-                    diffBoostRate=0;
-                    acceleRate=0;
-                }
-            //console.log(baseRate+" / "+diffBoostRate+" / "+acceleRate);
-            currStats+=(baseRate + diffBoostRate + acceleRate);
-            maxStats+=baseRate;
-            if(currStats > maxStats)
-                {
-                    currStats = maxStats;
-                }
-            earnedScore--;
-        }
-    maxStats=maxStatsCopy
-    maxScoreCopy=maxScore;
-    while(maxScore)
-        {
-            maxStats+=baseRate;
-            maxScore--;
-        }
-    if(currStats > maxStats)
-        {
-            currStats = maxStats;
-        }
-    currStats=Math.floor(currStats);
-    //maxStats=Math.floor(maxStats);
-    earnedStas=currStats-currentStatsCopy;
-    /*
-    return "Current Stats: "+currentStatsCopy +
-        "\nCurrent Starting Stats: "+(50+Math.floor((maxStatsCopy-50)/100)*25) + 
-        "\nCurrent Max Stats: "+maxStatsCopy + 
-        "\nMax Score: "+maxScoreCopy + 
-        "\nEarned Score: "+earnedScoreCopy + 
-        "\nEarned Stats: "+earnedStas+" (" +Math.round(earnedStas*.6)+"/"+Math.round(earnedStas*.4)+")" + 
-        "\nNew Stats: "+currStats + 
-        "\nNew Max Stats: "+maxStats + 
-        "\nNew Starting Stats: "+(50+Math.floor((maxStats-50)/100)*25);
-    earnedStats.textContent=earnedStas
-    earnedSplit.textContent = "("+Math.round(earnedStas*.6)+"/"+Math.round(earnedStas*.4)+")";
-    newStats.textContent = currStats;
-    document.getElementById('max-stats-label-new').textContent=maxStats;
-    document.getElementById('new-start-stats').textContent=(50+Math.floor((maxStats-50)/100)*25);
-    */
-    
-    returnVal.earnedStats=currStats-currentStatsCopy
-    if((stm)&&(str)&&(spd)&&(dex)&&(will)&&(stm+str+spd+dex+will==currentStatsCopy))
-        {
-            returnVal.earnedSplit=`(${Math.round((currentStatsCopy+returnVal.earnedStats) * 0.6-(stm+str+spd))}/${Math.round((currentStatsCopy+returnVal.earnedStats) * 0.4-(dex+will))})`;
-        }
-    else
-    {
-        returnVal.earnedSplit = `(${Math.round(earnedStas * 0.6)}/${Math.round(earnedStas * 0.4)})`;
-    }
-    
-    returnVal.newStats = currStats;
-    
-    return returnVal;
-    
-}
-
-function WhenWillICatchUp(maxStats,startingStats=-1,score=50)
-{
-    var maxStatCopy=maxStats
-    if(startingStats==-1)
-        {
-            startingStats=(50+Math.floor((maxStats-50)/100)*25)
-        } 
-    var res1, res2, res3, res4;
-    res1 = res2 = res3 = res4 = ""
-    while (startingStats<maxStats)
-        {
-            if((startingStats>=maxStats*.50)&&res1=="")
-                {
-                    res1="50%: "+(maxStats-maxStatCopy)/25+" Forts\n"
-                }
-            if((startingStats>=maxStats*.75)&&res2=="")
-                {
-                    res2="75%: "+(maxStats-maxStatCopy)/25+" Forts\n"
-                }
-            if((startingStats>=maxStats*.95)&&res3=="")
-                {
-                    res3="95%: "+(maxStats-maxStatCopy)/25+" Forts\n"
-                }
-            startingStats=calculate(startingStats,maxStats,score,50).newStats;
-            maxStats=calculate(maxStats,maxStats,50,50).newStats;
-            if(maxStats>2500)
-                {
-                    res4+="100%: >2500 Stats"
-                    return res1+res2+res3+res4;
-                }
-        }
-    res4+="100%: "+(maxStats-maxStatCopy)/25+" Forts\n";
-    return res1+res2+res3+res4;
-}
-
-function getFortResults(number=50)
-{
-    let eachResult
-    let result=[]
-    let sheetID = "11DBV69f-U9T1EXbdI_AvjHpp7XzSs38fH9eKqdx2sUw";
-    // JOEY'S SHEET FOR DEBUGGING
-    //let sheetID = "10bBzQNryutYgx49QEb2Vz19alL55lS_hEJ-FrJTOIFE";
-    let url = `https://spreadsheets.google.com/feeds/list/${sheetID}/1/public/full?alt=json`;
-
-    let request = new XMLHttpRequest();
-    
-    request.ontimeout = () => {
-        logError(statsErrorMsg, `Error - Timed Out while getting Fort Results. Please manually do so manually.`);
-    };
-
-    request.open('GET', url);
-    request.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-
-    request.timeout = 5000;
-
-    request.send();
-    
-    request.onreadystatechange = async function() {
-        if (request.readyState == XMLHttpRequest.DONE) {
-            if (request.status === 200) {
-                // Good response
-                let data = JSON.parse(request.response).feed.entry;
-                for(i=0;i<number;i++)
-                    {
-                        username.value=data[i]["gsx$username"]["$t"]
-                        fetchUserStats();
-                        await sleep(10000);
-                        eachResult=username.value+"\t"+score.innerHTML+"\t"+earnedStats.innerHTML+"\tReserve:"+earnedReserve.innerHTML;
-                        result[i]=eachResult;
-                        /*
-                        result[i]={
-                                    User: usernames[i],
-                                    Score: score.innerHTML,
-                                    Split: earnedSplit.innerHTML,
-                                    Reserve: earnedReserve.innerHTML,
-                                  }
-                        */
-                        console.log(eachResult)
-                    }
-                console.log(result)
-            }
-            else {
-                logError(maxErrorMsg, "Error Getting Usernames from Google");
-                return;
-            }
-        }
-    }
-
-    
-    request.onabort = function() {
-        logError(maxErrorMsg, "Get Fort Results Aborted");
-        calculateMaxStats();
-        return;
-    }
-
-    request.onerror = function() {
-        logError(maxErrorMsg, "Error Getting Usernames from Google");
-        console.log(`Error ${request.status}: ${request.statusText}`);
-        return;
-    }
-}
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
+*/
+/// END OF OLD STUFF
