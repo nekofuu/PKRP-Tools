@@ -46,6 +46,7 @@ let posts = [];
 fetchBtn.addEventListener("click", reset);
 fetchBtn.addEventListener("click", fetchComments);
 removeBtn.addEventListener("click", removeComments);
+calcBtn.addEventListener("click", reset);
 calcBtn.addEventListener("click", checkActive);
 username.addEventListener('change', () => {
     usernameHeader.textContent = username.value;
