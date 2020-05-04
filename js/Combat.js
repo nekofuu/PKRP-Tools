@@ -16,9 +16,10 @@ window.onload=function(){
 
 function calculateAttack()
 {
+    var basebase=document.getElementById("attbaseIPF").valueAsNumber;
     var basestm=document.getElementById("attstmIPF").valueAsNumber;
     var basestr=document.getElementById("attstrIPF").valueAsNumber;
-    var basespd=document.getElementById("attspdIPF").valueAsNumber;
+    var basespd=document.getElementById("attspdIPF").valueAsNumber; var basespdCopy=basespd;
     var basedex=document.getElementById("attdexIPF").valueAsNumber;
     var basewill=document.getElementById("attwillIPF").valueAsNumber;
     var oppwill=document.getElementById("defwillIPF").valueAsNumber;
@@ -26,7 +27,7 @@ function calculateAttack()
     var hakiLevel=document.getElementById("attHakiLevel").value;
     var boostedSpeed=document.getElementById("boostedSpeed");
     var meitoGrade=document.getElementById("attbladeGrade").value;
-    var ench=document.getElementById("attEnchantment").value;
+    var ench=document.getElementById("attEnchantment").value; var enchThr=150;
     var PowCheck=document.getElementById("attPowCheck").checked;
     //var DFCheck=document.getElementById("attDFCheck").checked;
     //var UACheck=document.getElementById("attUACheck").checked;
@@ -86,9 +87,9 @@ function calculateAttack()
             case "RGS":baseAtt=1.35;restype="Att";break;
             case "RGP":baseAtt=1.45;restype="Att";break;
             case "HAL":minDrain=0;maxDrain=15;HaoMult=.4;willReq=200;restype="Hao";break;
-            case "HAM":minDrain=5;maxDrain=23;HaoMult=.6;willReq=250;restype="Hao";break;
-            case "HAH":minDrain=10;maxDrain=30;HaoMult=.8;willReq=300;restype="Hao";break;
-            case "HAI":minDrain=15;maxDrain=38;HaoMult=1;willReq=350;restype="Hao";break;
+            case "HAM":minDrain=5;maxDrain=22;HaoMult=.6;willReq=250;restype="Hao";break;
+            case "HAH":minDrain=10;maxDrain=29;HaoMult=.8;willReq=300;restype="Hao";break;
+            case "HAI":minDrain=15;maxDrain=37;HaoMult=1;willReq=350;restype="Hao";break;
             case "HAS":minDrain=15;maxDrain=45;HaoMult=1;willReq=350;restype="Hao";break;
             case "HAP":minDrain=20;maxDrain=45;HaoMult=1.2;willReq=400;restype="Hao";break;
                 
@@ -96,11 +97,21 @@ function calculateAttack()
         }
     switch(ench)
         {
-            case "STA": basestm+=(totalStats*.025+20);boostedStat=basestm;statBoosted="Stamina";restype+="Stat";break;
-            case "STR": basestr+=(totalStats*.025+20);boostedStat=basestr;statBoosted="Strength";restype+="Stat";break;
-            case "SPD": basespd+=(totalStats*.025+20);boostedStat=basespd;statBoosted="Speed";restype+="Stat";break;
-            case "DEX": basedex+=(totalStats*.025+20);boostedStat=basedex;statBoosted="Dexterity";restype+="Stat";break;
-            case "WILL": basewill+=(totalStats*.025+20);boostedStat=basewill;statBoosted="Will";restype+="Stat";break;
+            case "STA": enchBoost=(totalStats/10*.5+10);if(enchBoost>enchThr){enchBoost=(enchBoost-enchThr)*overflow+enchThr}
+                basestm+=enchBoost;boostedStat=basestm;statBoosted="Stamina";restype+="Stat";break;
+                
+            case "STR": enchBoost=(totalStats/10*.5+10);if(enchBoost>enchThr){enchBoost=(enchBoost-enchThr)*overflow+enchThr}
+                basestr+=enchBoost;boostedStat=basestr;statBoosted="Strength";restype+="Stat";break;
+                
+            case "SPD": enchBoost=(totalStats/10*.5+10);if(enchBoost>enchThr){enchBoost=(enchBoost-enchThr)*overflow+enchThr}
+                basespd+=enchBoost;boostedStat=basespd;statBoosted="Speed";restype+="Stat";break;
+                
+            case "DEX": enchBoost=(totalStats/10*.5+10);if(enchBoost>enchThr){enchBoost=(enchBoost-enchThr)*overflow+enchThr}
+                basedex+=enchBoost;boostedStat=basedex;statBoosted="Dexterity";restype+="Stat";break;
+                
+            case "WILL": enchBoost=(totalStats/10*.5+10);if(enchBoost>enchThr){enchBoost=(enchBoost-enchThr)*overflow+enchThr}
+                basewill+=enchBoost;boostedStat=basewill;statBoosted="Will";restype+="Stat";break;
+                
             default:break;
         }
     stats=[basestm,basestr,basespd,basedex,basewill];
@@ -162,7 +173,7 @@ function calculateAttack()
        */
     if(attackLevel.includes("SO"))
         {
-            SoruBoost=(spdReq+basespd)*SoruMult+SoruFlat;
+            SoruBoost=(spdReq+basespdCopy)*SoruMult+SoruFlat;
             if(SoruBoost>soruThr)
                 {
                     SoruBoost=(SoruBoost-soruThr)*overflow+soruThr;
@@ -216,10 +227,15 @@ function calculateAttack()
             case "SOW":MeitoAtt=0.30;MeitoFlat=45;break;
             default:break;
         }
+    if(meitoGrade=="SOW")
+        {
+            MeitoAtt=SaijoScale(basebase,0.20,0.30);
+            MeitoFlat=SaijoScale(basebase,30,45);
+        }
     if(PowCheck)
         {
             powerAtt=0.10;
-            powerFlat=12.5;
+            powerFlat=10;
         }
     
     attackMult=MeitoAtt+powerAtt+hakiAtt
@@ -255,8 +271,20 @@ function calculateAttack()
     basewill=adjStat(basewill,lowest,basestr);
     totalStats=basestm+basestr+basespd+basedex+basewill;
     thr=[basestr*5,thr].sort(function(a,b){return a-b})[0];
-    console.log(totalStats)
-    attackPower=(strFactor*basestr+spdFactor*basespd+dexFactor*basedex+willFactor*basewill+totalStats*baseFactor+flatBoost)*baseAtt+attackMult/10*totalStats+10;
+    basePower=(
+        strFactor*basestr+
+        spdFactor*basespd+
+        dexFactor*basedex+
+        willFactor*basewill+
+        baseFactor*totalStats
+    )
+    attackPower=(
+        basePower+
+        flatBoost+10+
+        attackMult*totalStats/10
+    )*baseAtt
+                
+    //attackPower=(strFactor*basestr+spdFactor*basespd+dexFactor*basedex+willFactor*basewill+totalStats*baseFactor+flatBoost)*baseAtt+attackMult/10*totalStats+10;
     if(attackPower>thr)
         {
             attackPower=(attackPower-thr)*overflow+thr;
@@ -280,16 +308,16 @@ function calculateDefense()
     var innDef,armDef=0,maxArmor,armSources,innSources,spdRed,armPerk,fullPart=1;
     var statDef,HakiMult,TekkaiMult,HakiMin,TekkaiMin,HakiBoost,TekkaiBoost,HakiFlat,TekkaiFlat,willReq,stamReq,ArmHakiBoost,armDmg;
     var stamFactor=.1,willFactor=0;
-    var overflow=.25,sloverflow=.10,thr=700,Tekkaithr,Hakithr;
+    var overflow=.25,sloverflow=.10,thr=700,armThr=600,Tekkaithr,Hakithr;
     var statRed=basestam*.00025+basewill*.00015, totSpdRed;
     var thrStat=0,dmgLvl="",dmgLvl2="";
     
     statDef=basestam*stamFactor+basewill*willFactor;
-    thrStat=[basestam/2,basewill].sort(function(a,b){return a-b})[0]
-    if(statDef>thrStat)
-        {
-            statDef=(statDef-thrStat)*overflow+thrStat;
-        }
+    //thrStat=[basestam/2,basewill].sort(function(a,b){return a-b})[0]
+    //if/(statDef>thrStat)
+    //    {
+    //        statDef=(statDef-thrStat)*overflow+thrStat;
+    //    }
     switch(tekkai)
         {
             case "TK1":TekkaiFlat=10;TekkaiMult=0.15;stamReq=70;Tekkaithr=100;break;
@@ -380,6 +408,7 @@ function calculateDefense()
         {
             armSources=[ArmHakiBoost,armor].sort(function(a,b){return a-b});
             armSources.reverse();
+            console.log(armSources)
             armDef=armSources[0]+armSources[1]*.25;
         }
     switch(attackLevel)
@@ -396,6 +425,10 @@ function calculateDefense()
     if(innDef>thr)
         {
             innDef=(innDef-thr)*overflow+thr;
+        }
+    if(armDef>armThr)
+        {
+            armDef=(armDef-armThr)*overflow+armThr;
         }
     document.getElementById("InnDef").textContent=Math.round(innDef);
     document.getElementById("ArmDef").textContent=Math.round(armDef);
@@ -483,6 +516,20 @@ function adjStat(stat,min,str)
             i++;
         }
     return res;
+}
+function SaijoScale(total, min, max)
+{
+    var minstats=1000, maxstats=1500;
+    if(total<minstats)
+        {
+            return min
+        }
+    if(total>maxstats)
+        {
+            return max
+        }
+    else return min+(max-min)*(total-minstats)/(maxstats-minstats)
+
 }
 /*
             */

@@ -778,7 +778,7 @@ function calculate(currStats,maxStats,earnedScore=20,maxScore=50)
     var earnedScoreCopy=earnedScore;
     var maxStatsCopy=maxStats;
     var maxScoreCopy=maxScore;
-    var baseRate=0.50, boostRate=0.20, acceleRate, diffBoostRate;
+    var baseRate=0.40, boostRate=0.15, acceleRate, diffBoostRate;  //Change Base to 0.50 and Boost to 0.20 for previous numbers
     var earnedStas;
     var startingStats=(50+Math.floor((maxStats-50)/100)*25)
     if(currStats < startingStats)
@@ -826,7 +826,7 @@ function calculate(currStats,maxStats,earnedScore=20,maxScore=50)
         {
             currStats = maxStats;
         }
-    currStats=Math.floor(currStats);
+    currStats=Math.round(currStats);
     //maxStats=Math.floor(maxStats);
     earnedStas=currStats-currentStatsCopy;
     
@@ -876,15 +876,15 @@ function WhenWillICatchUp(maxStats,startingStats=-1,score=50)
         {
             if((startingStats>=maxStats*.50)&&res1=="")
                 {
-                    res1="50%: "+(maxStats-maxStatCopy)/25+" Forts | "+maxStats+ "\n"
+                    res1="50%: "+(maxStats-maxStatCopy)/20+" Forts | "+startingStats+" / "+maxStats+ "\n"
                 }
             if((startingStats>=maxStats*.75)&&res2=="")
                 {
-                    res2="75%: "+(maxStats-maxStatCopy)/25+" Forts | "+maxStats+ "\n"
+                    res2="75%: "+(maxStats-maxStatCopy)/20+" Forts | "+startingStats+" / "+maxStats+ "\n"
                 }
             if((startingStats>=maxStats*.95)&&res3=="")
                 {
-                    res3="95%: "+(maxStats-maxStatCopy)/25+" Forts | "+maxStats+ "\n"
+                    res3="95%: "+(maxStats-maxStatCopy)/20+" Forts | "+startingStats+" / "+maxStats+ "\n"
                 }
             startingStats=calculate(startingStats,maxStats,score,50).newStats;
             maxStats=calculate(maxStats,maxStats,50,50).newStats;
@@ -894,7 +894,7 @@ function WhenWillICatchUp(maxStats,startingStats=-1,score=50)
                     return res1+res2+res3+res4;
                 }
         }
-    res4+="100%: "+(maxStats-maxStatCopy)/25+" Forts | "+maxStats+ "\n";
+    res4+="100%: "+(maxStats-maxStatCopy)/20+" Forts | "+startingStats+" / "+maxStats+ "\n";
     return res1+res2+res3+res4;
 }
 
