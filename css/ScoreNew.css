@@ -149,7 +149,7 @@ body {
     font-size: 3em;
 }
 
-#active-till, #inactive {
+#active-till, #semi-active-till #inactive {
     margin: 5px 0px 0px 0px;
     font-weight: 600;
     font-size: 1.2em;
@@ -159,7 +159,11 @@ body {
     color: green;
 }
 
-#active-till-date{
+#semi-active-till{
+    color: orange;
+}
+
+#active-till-date, #semi-active-till-date{
     font-size: 1.5em;
 }
 

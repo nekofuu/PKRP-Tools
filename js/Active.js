@@ -18,6 +18,8 @@ let removeErrorMsg = document.getElementById('remove-error-msg');
 // Results
 let activeTillElement = document.getElementById('active-till');
 let activeTillDate = document.getElementById('active-till-date');
+let semiActiveTillElement = document.getElementById('semi-active-till');
+let semiActiveTillDate = document.getElementById('semi-active-till-date');
 let inactive = document.getElementById('inactive');
 // Calculate Button
 let calcBtn = document.getElementById('calc-btn');
@@ -103,6 +105,7 @@ function reset()
         postsCol.removeChild(postsCol.lastChild);
     }
     activeTillElement.style.display="none";
+    semiActiveTillElement.style.display="none";
     inactive.style.display="none";
     posts = [];
     commentsLoaded = 0;
@@ -288,10 +291,12 @@ function filterPosts() {
 }
 
 function calculateWords() {
+    const MIN_ACTIVITY_THRESHOLD = 100;
     const ACTIVITY_THRESHOLD = 1000;
-    let activeTill="";
+    let activeTill="",semiActiveTill="";
     tempWordCount = 0;
     activeTillElement.style.display="none";
+    semiActiveTillElement.style.display="none";
     inactive.style.display="none";
     if (posts.length) {
         // Iterate through each comment from postsCol and get word count
@@ -315,6 +320,10 @@ function calculateWords() {
                 {
                     tempWordCount += countWords(commentElements[element].textContent);
                 }
+                if(tempWordCount>=MIN_ACTIVITY_THRESHOLD&&!(semiActiveTill))
+                    {
+                        semiActiveTill=comments[i].querySelector("span").innerHTML;
+                    }
                 if(tempWordCount>=ACTIVITY_THRESHOLD)
                     {
                         activeTill=comments[i].querySelector("span").innerHTML;
@@ -329,14 +338,20 @@ function calculateWords() {
         
     }
     if(activeTill)
-            {
-                activeTillElement.style.display="";
-                activeTillDate.innerText=new Date(new Date(activeTill).valueOf()+2592000000).toGMTString().substring(5,16);
-            }
-        else
-            {
-                inactive.style.display="";
-            }
+        {
+            console.log(1)
+            activeTillElement.style.display="";
+            activeTillDate.innerText=new Date(new Date(activeTill).valueOf()+2592000000).toGMTString().substring(5,16);
+        }
+    else if(semiActiveTill)
+        {
+            semiActiveTillElement.style.display="";
+            semiActiveTillDate.innerText=new Date(new Date(semiActiveTill).valueOf()+2592000000).toGMTString().substring(5,16);
+        }
+    else
+        {
+            inactive.style.display="";
+        }
         // Calculate score as soon as word counting is done
         //updateScore();
 
