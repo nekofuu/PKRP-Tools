@@ -1,3 +1,6 @@
+//Problem: PA/Haki is useless after the threshold. Make it so that they aren't. Making them ignore the cap entirely pushes the power creep even higher. Might have to reduce thresholds so that it stays within reasonable limits. Try messing with this formula 
+//attPow*=(1-attPow/700*.25);
+
 var ipfields=document.getElementsByClassName("IP");
 var errors=document.getElementsByClassName("error-msg");
 
@@ -36,7 +39,8 @@ function calculateAttack()
     var attackPower,attackMult,i,lowest=9999;
     var SoruBoost,SoruMult,spdReq,SoruFlat;
     var totalStats=basestm+basestr+basespd+basedex+basewill;
-    var baseAtt=0,hakiAtt=0,HakiFlat=0,powerAtt=0,powerFlat=0,MeitoAtt=0,MeitoFlat=0,curseAtt=0,curseFlat,attBoost,flatBoost;
+    var baseAtt=0,hakiAtt=0,HakiFlat=0,powerAtt=0,powerFlat=0,MeitoAtt=0,MeitoFlat=0,curseAtt=0,curseFlat,attBoost,flatBoost
+    var ignoreCapFlat,ignoreCapMult,thrIncrease=0;
     var stats=[basestr,basespd,basedex,basewill];
     var baseFactor=.01, boostedStat, statBoosted="";
     var stamBoost=0;
@@ -241,12 +245,12 @@ function calculateAttack()
     attackMult=MeitoAtt+powerAtt+hakiAtt
     if(attackMult>maxAttMult)
         {
-            attackMult=(attackMult-maxAttMult)*overflow+maxAttMult;
+            attackMult=((attackMult-maxAttMult)*overflow+maxAttMult);
         }
     flatBoost=powerFlat+HakiFlat+MeitoFlat;
     if(flatBoost>maxFlatBoost)
         {
-            flatBoost=(flatBoost-maxFlatBoost)*overflow+maxFlatBoost;
+            flatBoost=(flatBoost-maxFlatBoost)*overflow+maxFlatBoost;   
         }
     /*
     if(DFCheck)         //&&(attackLevel.includes("FS")
@@ -270,25 +274,26 @@ function calculateAttack()
     basedex=adjStat(basedex,lowest,basestr);
     basewill=adjStat(basewill,lowest,basestr);
     totalStats=basestm+basestr+basespd+basedex+basewill;
-    thr=[basestr*5,thr].sort(function(a,b){return a-b})[0];
+    thr=[basestr*2,thr].sort(function(a,b){return a-b})[0];
     basePower=(
         strFactor*basestr+
         spdFactor*basespd+
         dexFactor*basedex+
         willFactor*basewill+
         baseFactor*totalStats
-    )
+    )*baseAtt
     attackPower=(
         basePower+
-        flatBoost+10+
+        flatBoost+
         attackMult*totalStats/10
-    )*baseAtt
-                
+    )            
     //attackPower=(strFactor*basestr+spdFactor*basespd+dexFactor*basedex+willFactor*basewill+totalStats*baseFactor+flatBoost)*baseAtt+attackMult/10*totalStats+10;
+    thr+=(HakiFlat+powerFlat+(hakiAtt+powerAtt)*totalStats/10)
     if(attackPower>thr)
         {
             attackPower=(attackPower-thr)*overflow+thr;
         }
+    attackPower=PowerFunction(attackPower)+10
     document.getElementById("attPow").textContent=Math.round(attackPower);
     attPow=attackPower;
     
@@ -433,8 +438,8 @@ function calculateDefense()
     document.getElementById("InnDef").textContent=Math.round(innDef);
     document.getElementById("ArmDef").textContent=Math.round(armDef);
     document.getElementById("SpdPen").textContent=Math.round(spdRed);
-    innDef*=(1+innDef/700*.25);
-    armDef*=(1+armDef/700*.25);
+    //innDef*=(1+innDef/700*.25);
+    //armDef*=(1+armDef/700*.25);
     if(attPow>armDef)
         {
             dmgLvl2="Major Damage"
@@ -508,6 +513,21 @@ function adjStat(stat,min,str)
     while(i<stat)
         {
             mult=1-((i-min)/500*(1-stroffset))
+            if(mult<0.01)
+                {
+                    mult=0.01
+                }
+            res+=mult;
+            i++;
+        }
+    return res;
+}
+function PowerFunction(pow)
+{
+    var res=pow*.25,i=pow*.25,mult;
+    while(i<pow)
+        {
+            mult=1-((pow-i)/1000)
             if(mult<0.01)
                 {
                     mult=0.01
