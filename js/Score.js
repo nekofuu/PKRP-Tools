@@ -52,11 +52,10 @@ let processingComments = false;
 let filteringComments = false;
 let filterIndex = 0;
 let maxNewStats = 0;
-let tempWordCount = 0;
-let tempCommentCount = 0;
-let commentsLoaded = 0;
+let tempWordCount = 0, modtempWordCount = 0;
+let commentsLoaded = 0,  modcommentsLoaded = 0;
 let commentsRemoved = false;
-let posts = [];
+let posts = [], modlinks = [];
 let str,stm,spd,dex,will,currentReserveScore,stri;
 
 // Event Listeners
@@ -403,6 +402,89 @@ function fetchComments() {
     query(url, fetchBtn, fetchErrorMsg, fetch);
 }
 
+function fetchModLinks()
+{
+    // Clear global variables
+    modlinks =[]
+    modcommentsLoaded = 0;
+    modtempWordCount = 0;
+    
+    let index = ""
+    let x=0
+    let sheetID = "1cJTwl83F0EYOPiRztLb0ENWbv-J4_jaXzBLnPZjkR94";
+
+    let url = `https://spreadsheets.google.com/feeds/list/${sheetID}/1/public/full?alt=json`;
+
+    let request = new XMLHttpRequest();
+    
+    request.ontimeout = () => {
+        logError(statsErrorMsg, `Error - Timed Out while fetching NPC Links.`);
+        fetchBtn.disabled = false;
+    };
+
+    request.open('GET', url);
+    request.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+
+    request.timeout = 5000;
+
+    request.send();
+    
+    request.onreadystatechange = function() {
+        if (request.readyState == XMLHttpRequest.DONE) {
+            if (request.status === 200) {
+                // Good response
+                let data = JSON.parse(request.response).feed.entry;
+                for(var i=0;i<data.length;i++)
+                    {
+                        if(data[i].gsx$username.$t==document.getElementById("username").value)
+                            {
+                                modlinks[x]={link:data[i].gsx$commentlink.$t,isLastLink:false};
+                                x++;
+                            }
+                    }
+                if(modlinks.length==0)
+                    {
+                        displayPosts();
+                    }
+                else
+                    {
+                        modlinks[modlinks.length-1].isLastLink=true;
+                    }
+                fetchModComments();
+            } else {
+                logError(statsErrorMsg, "Error Fetching NPC Links from Google");
+                fetchBtn.disabled = false;
+                return;
+            }
+        }
+    }
+    
+    request.onabort = function() {
+        logError(statsErrorMsg, "Fetching NPC Links Aborted");
+        calculateMaxStats();
+        fetchBtn.disabled = false;
+        return;
+    }
+
+    request.onerror = function() {
+        logError(statsErrorMsg, "Error Fetching NPC Links from Google");
+        console.log(`Error ${request.status}: ${request.statusText}`);
+        calculateMaxStats();
+        fetchBtn.disabled = false;
+        return;
+    }
+}
+
+function fetchModComments()
+{
+    let url='';
+    for(var i=0;i<modlinks.length;i++)
+        {
+            url=modlinks[i].link + ".json"
+            query(url, fetchBtn, fetchErrorMsg, modfetch, modlinks[i].isLastLink);
+        }
+}
+
 function removeComments() {
     filterIndex = 0;
     if (posts.length === 0) {
@@ -427,7 +509,7 @@ function removeComments() {
     }
 }
 
-function query(url = '', btnElement, errorMsgElement, callback) {
+function query(url = '', btnElement, errorMsgElement, callback, isLastLink) {
     errorMsgElement.classList.remove('show');
 
     let request = new XMLHttpRequest();
@@ -458,7 +540,7 @@ function query(url = '', btnElement, errorMsgElement, callback) {
             if (request.status === 200) {
                 //console.log(response.data);
                 // Call the Callback and send in the response data
-                callback(response);
+                callback(response, isLastLink);
             }
         }
     }
@@ -471,6 +553,14 @@ function fetch(response) {
     processingComments = true;
     queryStatus.textContent = 'Processing';
     processComments(response);
+}
+
+function modfetch(response, isLastLink)
+{
+    modcommentsLoaded++;
+    processingComments = true;
+    queryStatus.textContent = 'Processing';
+    modprocessComments(response, isLastLink);
 }
 
 function filter(response) {
@@ -533,7 +623,7 @@ function getRowTotalUptoDate(row,date)
     return res;
 }
 
-function processComments(response) {
+function processComments(response, isLastLink) {
     let data = response.data;
     //console.log(data);
     for (let comment in data.children) {
@@ -585,6 +675,7 @@ function processComments(response) {
         post.id = data.children[comment].data.id;
         post.date = data.children[comment].data.created_utc;
         post.edited = data.children[comment].data.edited;
+        post.NPC = false
         posts.push(post);
     }
 
@@ -598,14 +689,70 @@ function processComments(response) {
         }
 
         // Reenable fetchBtn so that the tool can still be used
-        fetchBtn.disabled = false;
-        queryStatus.textContent = 'Complete';
+        //fetchBtn.disabled = false;
+        //queryStatus.textContent = 'Complete';
         //commentCount.textContent = posts.length;
-        displayPosts();
+        fetchModLinks();
+        //displayPosts();
     }
 }
 
+function modprocessComments(response, isLastLink)
+{
+    let skipFlag=false
+    let comment = response[1].data.children[0].data;
+    
+    if (comment.created_utc < (startDate.valueAsNumber / 1000) + 43200) {
+        skipFlag=true;
+        //Commented out since mods may not post links in the right order
+        }
+
+        // Check if comment was made in the correct subreddit
+        // and if it was made later than end-date
+        // if so, continue to next comment
+        if (comment.created_utc > (endDate.valueAsNumber / 1000) + 43200) {
+            skipFlag=true;
+        }
+
+        if (comment.subreddit.localeCompare(subreddit.value, 'en', {sensitivity: 'base'}) !== 0) {
+            if (subreddit.value.localeCompare('StrawHatRPG', 'en', {sensitivity: 'base'}) === 0) {
+                // If the subreddit is set to StrawHatRPG, then it checks if the comment was made in
+                // any of the subs within the StrawHatRPG Community
+                if (comment.subreddit.localeCompare('StrawHatRPGShops', 'en', {sensitivity: 'base'}) !== 0) {
+                    skipFlag=true;
+                } 
+            } else {
+                skipFlag=true;
+            }
+        if (comment.author!='NPC-senpai')
+            {
+                skipFlag=true;
+            }
+        }
+    if(!skipFlag)
+        {
+            let post = {};
+            post.postedTo = response[0].data.children[0].data.title;
+            post.postedToLink = comment.permalink;
+            post.body = comment.body_html;
+            post.id = comment.id;
+            post.date = comment.created_utc;
+            post.edited = comment.edited;
+            post.NPC = true
+            posts.push(post);
+        }
+    
+    if(isLastLink)
+        {
+            displayPosts();
+        }
+    return
+}
+
 function displayPosts() {
+    //Query is Complete
+    fetchBtn.disabled = false;
+    queryStatus.textContent = 'Complete';
     // Delete all comments from webpage to make room for the new ones
     while (postsCol.lastChild.id !== 'posts-col-header') {
         postsCol.removeChild(postsCol.lastChild);
@@ -614,7 +761,16 @@ function displayPosts() {
     for (let i in posts) {
         let commentDiv = document.createElement('div');
         commentDiv.classList.add('comment');
-
+        
+        if(posts[i].NPC)
+            {
+                let commentNPC = document.createElement('h4');
+                commentNPC.classList.add('comment-npc');
+                commentNPC.innerHTML = 'NPC Reply';
+                commentDiv.appendChild(commentNPC);
+                commentDiv.style.display = 'none';
+            }
+        
         let commentTitle = document.createElement('h3');
         commentTitle.classList.add('comment-title');
         commentTitle.innerHTML = `Posted to: <a href="https://www.reddit.com${posts[i].postedToLink}">${posts[i].postedTo}</a>`;
@@ -640,6 +796,14 @@ function displayPosts() {
     calculateWords();
 }
 
+function showAllPosts()
+{
+    for(var i=0;i<postsCol.childElementCount;i++)
+        {
+            postsCol.children[i].style.display="";
+        }
+}
+
 function filterPosts() {
     let comments = Array.from(postsCol.querySelectorAll('.comment'));
     // Iterate through posts array
@@ -656,6 +820,7 @@ function filterPosts() {
 }
 
 function calculateWords() {
+    var isNPCReply;
     tempWordCount = 0;
 
     if (posts.length) {
@@ -664,6 +829,11 @@ function calculateWords() {
         let posts = Array.from(postsCol.querySelectorAll('.comment-body'));
 
         for (let i in posts) {
+            isNPCReply=false
+            if(comments[i].children[0].innerText=='NPC Reply')
+                {
+                    isNPCReply=true;
+                }
             if (comments[i].classList.contains('filtered')) {
                 // Do not count filtered comments
                 continue;
@@ -678,7 +848,14 @@ function calculateWords() {
                     commentElements[element].tagName.toLowerCase() != 'ul' &&
                     commentElements[element].tagName.toLowerCase() != 'ol')
                 {
-                    tempWordCount += countWords(commentElements[element].textContent);
+                    if(isNPCReply)
+                        {
+                            tempWordCount += countWords(commentElements[element].textContent)*2/3
+                        }
+                    else
+                        {
+                            tempWordCount += countWords(commentElements[element].textContent);
+                        }
                 }
             }
         }
@@ -778,7 +955,8 @@ function calculate(currStats,maxStats,earnedScore=20,maxScore=50)
     var earnedScoreCopy=earnedScore;
     var maxStatsCopy=maxStats;
     var maxScoreCopy=maxScore;
-    var baseRate=0.40, boostRate=0.15, acceleRate, diffBoostRate;  //Change Base to 0.50 and Boost to 0.20 for previous numbers
+    var baseRate=0.40, boostRate=.16, acceleRate, diffBoostRate;  //Change Base to 0.50 and Boost to 0.20 for previous numbers
+    
     var earnedStas;
     var startingStats=(50+Math.floor((maxStats-50)/100)*25)
     if(currStats < startingStats)
@@ -898,6 +1076,8 @@ function WhenWillICatchUp(maxStats,startingStats=-1,score=50)
     return res1+res2+res3+res4;
 }
 
+
+
 function getFortResults(number=50)
 {
     let eachResult
@@ -925,7 +1105,7 @@ function getFortResults(number=50)
             if (request.status === 200) {
                 // Good response
                 let data = JSON.parse(request.response).feed.entry;
-                for(i=0;i<number;i++)
+                for(var i=0;i<number;i++)
                     {
                         username.value=data[i]["gsx$username"]["$t"]
                         fetchUserStats();

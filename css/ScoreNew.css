@@ -237,6 +237,13 @@ body {
     background-color: #8e4646;
 }
 
+.comment-npc {
+    margin: 0;
+    padding: 0;
+    font-size: 1.2em;
+    color: yellow;
+}
+
 .comment-title {
     margin: 0;
     padding: 0;
