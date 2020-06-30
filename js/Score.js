@@ -52,7 +52,7 @@ let processingComments = false;
 let filteringComments = false;
 let filterIndex = 0;
 let maxNewStats = 0;
-let tempWordCount = 0, modtempWordCount = 0;
+let tempWordCount = 0, playerWordCount = 0, npcWordCount = 0;
 let commentsLoaded = 0,  modcommentsLoaded = 0;
 let commentsRemoved = false;
 let posts = [], modlinks = [];
@@ -382,6 +382,8 @@ function fetchComments() {
     posts = [];
     commentsLoaded = 0;
     tempWordCount = 0;
+    npcWordCount = 0;
+    playerWordCount = 0;
     commentsRemoved = false;
     filterIndex = 0;
 
@@ -405,9 +407,10 @@ function fetchComments() {
 function fetchModLinks()
 {
     // Clear global variables
+    var plink
     modlinks =[]
     modcommentsLoaded = 0;
-    modtempWordCount = 0;
+    //modtempWordCount = 0;
     
     let index = ""
     let x=0
@@ -436,21 +439,29 @@ function fetchModLinks()
                 let data = JSON.parse(request.response).feed.entry;
                 for(var i=0;i<data.length;i++)
                     {
-                        if(data[i].gsx$username.$t==document.getElementById("username").value)
+                        if(data[i].gsx$username.$t.toLocaleLowerCase()==document.getElementById("username").value.toLocaleLowerCase())
                             {
-                                modlinks[x]={link:data[i].gsx$commentlink.$t,isLastLink:false};
+                                //modlinks[x]={link:data[i].gsx$commentlink.$t,isLastLink:false};
+                                plink=data[i].gsx$commentlink.$t.toString().split('.com')[1].split('?')[0].toLocaleLowerCase();
+                                if(plink.charAt(plink.length-1)!='/')
+                                    {
+                                        plink+="/"
+                                    }
+                                modlinks[x]=plink;
                                 x++;
                             }
                     }
                 if(modlinks.length==0)
                     {
+                        //posts[posts.length-1].isLastLink = true;
                         displayPosts();
                     }
                 else
                     {
-                        modlinks[modlinks.length-1].isLastLink=true;
+                        //modlinks[modlinks.length-1].isLastLink=true;
+                        fetchModComments();
                     }
-                fetchModComments();
+                
             } else {
                 logError(statsErrorMsg, "Error Fetching NPC Links from Google");
                 fetchBtn.disabled = false;
@@ -477,12 +488,8 @@ function fetchModLinks()
 
 function fetchModComments()
 {
-    let url='';
-    for(var i=0;i<modlinks.length;i++)
-        {
-            url=modlinks[i].link + ".json"
-            query(url, fetchBtn, fetchErrorMsg, modfetch, modlinks[i].isLastLink);
-        }
+    let url = `https://api.reddit.com/user/NPC-senpai/comments/.json`;
+    query(url, fetchBtn, fetchErrorMsg, modfetch);
 }
 
 function removeComments() {
@@ -509,7 +516,7 @@ function removeComments() {
     }
 }
 
-function query(url = '', btnElement, errorMsgElement, callback, isLastLink) {
+function query(url = '', btnElement, errorMsgElement, callback) {
     errorMsgElement.classList.remove('show');
 
     let request = new XMLHttpRequest();
@@ -540,7 +547,7 @@ function query(url = '', btnElement, errorMsgElement, callback, isLastLink) {
             if (request.status === 200) {
                 //console.log(response.data);
                 // Call the Callback and send in the response data
-                callback(response, isLastLink);
+                callback(response);
             }
         }
     }
@@ -555,12 +562,12 @@ function fetch(response) {
     processComments(response);
 }
 
-function modfetch(response, isLastLink)
+function modfetch(response)
 {
     modcommentsLoaded++;
     processingComments = true;
     queryStatus.textContent = 'Processing';
-    modprocessComments(response, isLastLink);
+    modprocessComments(response);
 }
 
 function filter(response) {
@@ -623,7 +630,7 @@ function getRowTotalUptoDate(row,date)
     return res;
 }
 
-function processComments(response, isLastLink) {
+function processComments(response) {
     let data = response.data;
     //console.log(data);
     for (let comment in data.children) {
@@ -676,6 +683,7 @@ function processComments(response, isLastLink) {
         post.date = data.children[comment].data.created_utc;
         post.edited = data.children[comment].data.edited;
         post.NPC = false
+        //post.isLastLink = false;
         posts.push(post);
     }
 
@@ -697,6 +705,77 @@ function processComments(response, isLastLink) {
     }
 }
 
+function modprocessComments(response) {
+    let data = response.data;
+    for (let comment in data.children) {
+        // Make sure comment is not older than start date
+        // If it is, end processing
+        if (data.children[comment].data.created_utc < (startDate.valueAsNumber / 1000) + 43200) {
+            if (data.children[comment].data.pinned === true) {
+                continue;
+            } else {
+                processingComments = false;
+                break;
+            }
+        }
+
+        // Check if comment was made in the correct subreddit
+        // and if it was made later than end-date
+        // if so, continue to next comment
+        if (data.children[comment].data.created_utc > (endDate.valueAsNumber / 1000) + 43200) {
+            continue;
+        }
+
+        if (data.children[comment].data.subreddit.localeCompare(subreddit.value, 'en', {sensitivity: 'base'}) !== 0) {
+            if (subreddit.value.localeCompare('StrawHatRPG', 'en', {sensitivity: 'base'}) === 0) {
+                // If the subreddit is set to StrawHatRPG, then it checks if the comment was made in
+                // any of the subs within the StrawHatRPG Community
+                if (data.children[comment].data.subreddit.localeCompare('StrawHatRPGShops', 'en', {sensitivity: 'base'}) !== 0) {
+                    continue;
+                } 
+            } else {
+                continue;
+            }
+        }
+        
+        //console.log(data.children[comment]);
+        for(var i=0;i<modlinks.length;i++)
+            {
+                if(modlinks[i]==data.children[comment].data.permalink.toLocaleLowerCase())
+                    {
+                        // Any comment that makes it this far is assumed to be
+                        // from the correct subreddit in the correct timeframe.
+                        // Now it will be added to the posts array
+                        let post = {};
+                        post.postedTo = data.children[comment].data.link_title;
+                        post.postedToLink = data.children[comment].data.permalink;
+                        post.body = data.children[comment].data.body_html;
+                        post.id = data.children[comment].data.id;
+                        post.date = data.children[comment].data.created_utc;
+                        post.edited = data.children[comment].data.edited;
+                        post.NPC = true
+                        //post.isLastLink = false;
+                        posts.push(post);
+                    }
+            }
+    }
+
+    if (processingComments && commentsLoaded < 1000 && data.after != null) {
+        let url = `https://api.reddit.com/user/NPC-senpai/comments/.json?limit=${QUERY_LIMIT}&?&after=${data.after}`;
+        //console.log(url);
+        query(url, fetchBtn, fetchErrorMsg, modfetch);
+    } else {
+        if (commentsLoaded >= 1000) {
+            logError(fetchErrorMsg, `Max Comments Loaded - Due to limitations set by Reddit, only the last 1000 comments from a user can be loaded`);
+        }
+
+        // Reenable fetchBtn so that the tool can still be used
+        fetchBtn.disabled = false;
+        queryStatus.textContent = 'Complete';
+        displayPosts();
+    }
+}
+/*
 function modprocessComments(response, isLastLink)
 {
     let skipFlag=false
@@ -738,19 +817,29 @@ function modprocessComments(response, isLastLink)
             post.id = comment.id;
             post.date = comment.created_utc;
             post.edited = comment.edited;
-            post.NPC = true
+            post.NPC = true;
+            post.isLastLink = isLastLink;
+            
             posts.push(post);
+            processingComments=false;
         }
     
-    if(isLastLink)
+    if(posts[posts.length-1].isLastLink&&!processingComments)
         {
+            console.log(2)
             displayPosts();
         }
-    return
 }
-
+*/
 function displayPosts() {
+    /*
+    if(!posts[posts.length-1].isLastLink)
+        {
+            return;
+        }
+    */
     //Query is Complete
+    processingComments=false;
     fetchBtn.disabled = false;
     queryStatus.textContent = 'Complete';
     // Delete all comments from webpage to make room for the new ones
@@ -758,7 +847,7 @@ function displayPosts() {
         postsCol.removeChild(postsCol.lastChild);
     }
     // Iterate through posts array
-    for (let i in posts) {
+    for (var i=0;i<posts.length;i++) {
         let commentDiv = document.createElement('div');
         commentDiv.classList.add('comment');
         
@@ -792,7 +881,6 @@ function displayPosts() {
 
         postsCol.appendChild(commentDiv);
     }
-
     calculateWords();
 }
 
@@ -807,7 +895,7 @@ function showAllPosts()
 function filterPosts() {
     let comments = Array.from(postsCol.querySelectorAll('.comment'));
     // Iterate through posts array
-    for (let i in posts) {
+    for (var i=0;i<posts.length;i++) {
         //console.log(posts[i]);
         if (posts[i].filter) {
             let comment = comments[i];
@@ -828,7 +916,7 @@ function calculateWords() {
         let comments = Array.from(postsCol.querySelectorAll('.comment'));
         let posts = Array.from(postsCol.querySelectorAll('.comment-body'));
 
-        for (let i in posts) {
+        for (var i=0;i<posts.length;i++) {
             isNPCReply=false
             if(comments[i].children[0].innerText=='NPC Reply')
                 {
@@ -851,10 +939,12 @@ function calculateWords() {
                     if(isNPCReply)
                         {
                             tempWordCount += countWords(commentElements[element].textContent)*2/3
+                            npcWordCount += countWords(commentElements[element].textContent)
                         }
                     else
                         {
                             tempWordCount += countWords(commentElements[element].textContent);
+                            playerWordCount += countWords(commentElements[element].textContent);
                         }
                 }
             }
@@ -1109,7 +1199,7 @@ function getFortResults(number=50)
                     {
                         username.value=data[i]["gsx$username"]["$t"]
                         fetchUserStats();
-                        await sleep(10000);
+                        await sleep(20000);
                         eachResult=username.value+"\t"+score.innerHTML+"\t"+earnedStats.innerHTML+"\tReserve:"+earnedReserve.innerHTML;
                         result[i]=eachResult;
                         /*
