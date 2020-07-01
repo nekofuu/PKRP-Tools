@@ -49,19 +49,21 @@ let postsCol = document.getElementById('posts-col');
 // Global Variables
 const QUERY_LIMIT = 50;
 let processingComments = false;
+let modprocessingComments = false;
 let filteringComments = false;
 let filterIndex = 0;
 let maxNewStats = 0;
 let tempWordCount = 0, playerWordCount = 0, npcWordCount = 0;
 let commentsLoaded = 0,  modcommentsLoaded = 0;
 let commentsRemoved = false;
-let posts = [], modlinks = [];
+let posts = [], modlinks = [], donelinks = [];
 let str,stm,spd,dex,will,currentReserveScore,stri;
+//let dlIndex = 0;
 
 // Event Listeners
-fetchBtn.addEventListener("click", fetchComments);
+//fetchBtn.addEventListener("click", fetchComments);
 removeBtn.addEventListener("click", removeComments);
-username.addEventListener('change', () => {
+fetchBtn.addEventListener('click', () => {
     usernameHeader.textContent = username.value;
     fetchBtn.disabled = true;
     fetchUserStats();
@@ -231,7 +233,7 @@ function changeStartingStats() {
 
 
 // Attempt to fetch user's stats when a new username is entered
-function fetchUserStats() {
+function fetchUserStats(chain=true) {
     // Remove stats error because we're getting a new username and new stats
     statsErrorMsg.classList.remove('show');
 
@@ -280,7 +282,7 @@ function fetchUserStats() {
                         }
                     else
                     {
-                        currentStats.value = Number(data[entry].gsx$currentstats.$t);
+                        currentStats.value = Number(data[entry].gsx$currentstats.$t);(50+Math.floor((maxStats.valueAsNumber-50)/100)*25)
                         stm=Number(data[entry+1].gsx$currentstats.$t);
                         str=Number(data[entry+2].gsx$currentstats.$t);
                         spd=Number(data[entry+3].gsx$currentstats.$t);
@@ -288,32 +290,81 @@ function fetchUserStats() {
                         will=Number(data[entry+5].gsx$currentstats.$t);
                         currentReserveScore=Number(data[entry+6].gsx$currentstats.$t);
                     }
-                    fetchComments();
+                    
+                    if(chain)
+                        {
+                            fetchComments();
+                        }
+                    else
+                        {
+                            return
+                        }
+
                 } else {
                     logError(statsErrorMsg, "Error Fetching User's Stats. Check spelling or enter stats manually");
-                    fetchBtn.disabled = false;
+                    currentStats.value = (50+Math.floor((maxStats.valueAsNumber-50)/100)*25)
+                    if(chain)
+                        {
+                            fetchComments();
+                        }
+                    else
+                        {
+                            return
+                        }
+
+                    //fetchBtn.disabled = false;
                 }
                 //return;
             } else {
                 logError(statsErrorMsg, "Error Fetching User's Stats from Google");
-                fetchBtn.disabled = false;
-                return;
+                currentStats.value = (50+Math.floor((maxStats.valueAsNumber-50)/100)*25)
+                    if(chain)
+                        {
+                            fetchComments();
+                        }
+                    else
+                        {
+                            return
+                        }
+
+                //fetchBtn.disabled = false;
+                //return;
             }
         }
     }
     request.onabort = function() {
         logError(statsErrorMsg, "Fetching User's Stats Aborted");
-        calculateMaxStats();
-        fetchBtn.disabled = false;
-        return;
+        currentStats.value = (50+Math.floor((maxStats.valueAsNumber-50)/100)*25)
+                    if(chain)
+                        {
+                            fetchComments();
+                        }
+                    else
+                        {
+                            return
+                        }
+
+        //calculateMaxStats();
+        //fetchBtn.disabled = false;
+        //return;
     }
 
     request.onerror = function() {
         logError(statsErrorMsg, "Error Fetching User's Stats from Google");
         console.log(`Error ${request.status}: ${request.statusText}`);
-        calculateMaxStats();
-        fetchBtn.disabled = false;
-        return;
+        currentStats.value = (50+Math.floor((maxStats.valueAsNumber-50)/100)*25)
+                    if(chain)
+                        {
+                            fetchComments();
+                        }
+                    else
+                        {
+                            return
+                        }
+
+        //calculateMaxStats();
+        //fetchBtn.disabled = false;
+        //return;
     }
 }
 
@@ -350,7 +401,7 @@ function changeDate() {
         let endString = `${year}-${month}-${day}`;
         endDate.value = endString;
         fetchMaxStats();
-        fetchUserStats();
+        fetchUserStats(false);
     }
 }
 
@@ -410,6 +461,7 @@ function fetchModLinks()
     var plink
     modlinks =[]
     modcommentsLoaded = 0;
+    //dlIndex = 0;
     //modtempWordCount = 0;
     
     let index = ""
@@ -565,7 +617,7 @@ function fetch(response) {
 function modfetch(response)
 {
     modcommentsLoaded++;
-    processingComments = true;
+    modprocessingComments = true;
     queryStatus.textContent = 'Processing';
     modprocessComments(response);
 }
@@ -714,7 +766,7 @@ function modprocessComments(response) {
             if (data.children[comment].data.pinned === true) {
                 continue;
             } else {
-                processingComments = false;
+                modprocessingComments = false;
                 break;
             }
         }
@@ -741,8 +793,25 @@ function modprocessComments(response) {
         //console.log(data.children[comment]);
         for(var i=0;i<modlinks.length;i++)
             {
+                /*
+                var doneFlag = false;
+                for(var j=0;j<donelinks.length;j++)
+                    {
+                        if(donelinks[j]==modlinks[i])
+                            {
+                                doneFlag=true;
+                                break;
+                            }
+                    }
+                if(doneFlag)
+                    {
+                        continue;
+                    }
+                */
                 if(modlinks[i]==data.children[comment].data.permalink.toLocaleLowerCase())
                     {
+                        //donelinks[dlIndex]=modlinks[i]
+                        //dlIndex++;
                         // Any comment that makes it this far is assumed to be
                         // from the correct subreddit in the correct timeframe.
                         // Now it will be added to the posts array
@@ -760,18 +829,15 @@ function modprocessComments(response) {
             }
     }
 
-    if (processingComments && commentsLoaded < 1000 && data.after != null) {
+    if (modprocessingComments && modcommentsLoaded < 1000 && data.after != null) {
         let url = `https://api.reddit.com/user/NPC-senpai/comments/.json?limit=${QUERY_LIMIT}&?&after=${data.after}`;
         //console.log(url);
         query(url, fetchBtn, fetchErrorMsg, modfetch);
     } else {
-        if (commentsLoaded >= 1000) {
+        if (modcommentsLoaded >= 1000) {
             logError(fetchErrorMsg, `Max Comments Loaded - Due to limitations set by Reddit, only the last 1000 comments from a user can be loaded`);
         }
 
-        // Reenable fetchBtn so that the tool can still be used
-        fetchBtn.disabled = false;
-        queryStatus.textContent = 'Complete';
         displayPosts();
     }
 }
@@ -839,6 +905,7 @@ function displayPosts() {
         }
     */
     //Query is Complete
+    modprocessingComments=false;
     processingComments=false;
     fetchBtn.disabled = false;
     queryStatus.textContent = 'Complete';
@@ -1198,8 +1265,8 @@ function getFortResults(number=50)
                 for(var i=0;i<number;i++)
                     {
                         username.value=data[i]["gsx$username"]["$t"]
-                        fetchUserStats();
-                        await sleep(20000);
+                        fetchBtn.click();
+                        await sleep(10000);
                         eachResult=username.value+"\t"+score.innerHTML+"\t"+earnedStats.innerHTML+"\tReserve:"+earnedReserve.innerHTML;
                         result[i]=eachResult;
                         /*
