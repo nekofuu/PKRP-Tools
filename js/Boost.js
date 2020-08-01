@@ -201,8 +201,8 @@ function mainCalcFunction()
     switch(stancePerkLevel)
         {
             case '0':statLossReduction=0;maxStanceFlatBoost=0;break;
-            case '1':statLossReduction=25;maxStanceFlatBoost=5;break;
-            case '2':statLossReduction=50;maxStanceFlatBoost=10;break;
+            case '1':statLossReduction=25;maxStanceFlatBoost=15;break;
+            case '2':statLossReduction=50;maxStanceFlatBoost=15;break;
             case '3':statLossReduction=75;maxStanceFlatBoost=15;break;  
                 
             default:statLossReduction=0;break;

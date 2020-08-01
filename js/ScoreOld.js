@@ -1050,7 +1050,7 @@ function countWords(str) {
 const MAX_RESERVE_SCORE = 5;
 const MAX_TOTAL_RESERVE = 50;
 const WORD_REQUIREMENT = 100;
-const TOTAL_WORDS_REQ = 5000;
+const TOTAL_WORDS_REQ = 5100;
 //const WORDS_PER_POINT = 170;
 
 calcBtn.addEventListener('click', () => {
@@ -1058,85 +1058,11 @@ calcBtn.addEventListener('click', () => {
     updateCalcValues(calculate(currentStats.valueAsNumber, maxStats.valueAsNumber, manualScore.valueAsNumber, maxScore.valueAsNumber));
 });
 
-
-function revScore(points, MAX_STAT_SCORE)
-{
-    //var MAX_STAT_SCORE = maxScore.valueAsNumber;
-    var MIN_SCORE = maxScore.valueAsNumber*0.40;
-    var words=0,i=0;
-    points-=MIN_SCORE
-    if(points<0) points=0;
-    var baseRate=1/(MAX_STAT_SCORE-MIN_SCORE)*2850;
-    var baseExponent=1+1/(MAX_STAT_SCORE-MIN_SCORE)*1.1;
-    
-    while(points)
-        {
-            words+=baseRate*(baseExponent**i)
-            points--;
-            i++;
-            if(i>i>MAX_STAT_SCORE + 5 * (MAX_STAT_SCORE - MIN_SCORE)/30 - 1)
-                {
-                    i++;
-                }
-        }
-    return Math.ceil(words)
-}
-
-function newUpdateScore(tempWordCount, MAX_STAT_SCORE) {
-    //var MAX_STAT_SCORE = maxScore.valueAsNumber;
-    var MIN_SCORE = maxScore.valueAsNumber*0.40;
-    var baseRate=1/(MAX_STAT_SCORE-MIN_SCORE)*2850;
-    var baseExponent=1+1/(MAX_STAT_SCORE-MIN_SCORE)*1.1
-    var tempWordCountCopy = tempWordCount
-    var i=0;
-    //var WORDS_PER_POINT = 5179/(MAX_STAT_SCORE-MIN_SCORE);
-    //var NORMAL_SCORE_RATE = 5100/30;
-    // Get a temporary score by dividing word count by WORDS_PER_POINT
-    //tempScore = Math.floor(tempWordCount / WORDS_PER_POINT);
-    // If the player has written at least 100 words, they can get the minimum score of 20
-    let tempScore = 0;
-    let earnedReserveScore = 0;
-    if (tempWordCount >= WORD_REQUIREMENT) {
-        // Calculate Score
-        tempScore = MIN_SCORE
-        while(tempWordCountCopy>=baseRate*(baseExponent**i))
-            {
-                tempScore++;
-                tempWordCountCopy-=baseRate*(baseExponent**i)
-                i++;
-                if(i>MAX_STAT_SCORE + MAX_RESERVE_SCORE - 1)
-                    {
-                        i++;
-                    }
-            }
-        if (tempScore > MAX_STAT_SCORE) {
-            earnedReserveScore = Math.floor((tempScore - MAX_STAT_SCORE)*30/(MAX_STAT_SCORE - MIN_SCORE))
-            tempScore = MAX_STAT_SCORE;
-        }
-        if(earnedReserveScore>MAX_TOTAL_RESERVE)
-            {
-                earnedReserveScore=MAX_TOTAL_RESERVE
-            }
-        
-    } else {
-        logError(statsErrorMsg, `Player did not write ${WORD_REQUIREMENT} words, 0 points awarded!`);
-        tempScore = 0;
-        earnedReserveScore = 0;
-    }
-    /*
-    score.textContent = tempScore;
-    manualScore.value = tempScore;
-    earnedReserve.textContent = earnedReserveScore;
-    totalReserve.textContent =  currentReserveScore + earnedReserveScore;
-    */
-    return (tempScore+"/"+earnedReserveScore)
-}
-
 function updateScore() {
     var MAX_STAT_SCORE = maxScore.valueAsNumber;
     var MIN_SCORE = maxScore.valueAsNumber*0.40;
-    var WORDS_PER_POINT = 5000/(MAX_STAT_SCORE-MIN_SCORE);
-    var NORMAL_SCORE_RATE = 5000/30;
+    var WORDS_PER_POINT = 5100/(MAX_STAT_SCORE-MIN_SCORE);
+    var NORMAL_SCORE_RATE = 5100/30;
     // Get a temporary score by dividing word count by WORDS_PER_POINT
     //tempScore = Math.floor(tempWordCount / WORDS_PER_POINT);
     // If the player has written at least 100 words, they can get the minimum score of 20
@@ -1145,7 +1071,7 @@ function updateScore() {
     if (tempWordCount >= WORD_REQUIREMENT) {
         // Calculate Score
         tempScore = MIN_SCORE + Math.floor(tempWordCount / WORDS_PER_POINT);
-        earnedReserveScore = (tempScore - MAX_STAT_SCORE)/(5000/(MAX_STAT_SCORE-MIN_SCORE)/NORMAL_SCORE_RATE);
+        earnedReserveScore = (tempScore - MAX_STAT_SCORE)/(5100/(MAX_STAT_SCORE-MIN_SCORE)/NORMAL_SCORE_RATE);
         // If score is above MAX_STAT_SCORE, set it equal to max score
         if (tempScore > MAX_STAT_SCORE) {
             tempScore = MAX_STAT_SCORE;
@@ -1186,12 +1112,7 @@ function calculate(currStats,maxStats,earnedScore=20,maxScore=50)
     var earnedScoreCopy=earnedScore;
     var maxStatsCopy=maxStats;
     var maxScoreCopy=maxScore;
-    var baseRate=0.50, boostRate=0.25, acceleRate, diffBoostRate;  
-    var redRate=0.795
-    //15th March-1st April: Base: 0.50, Boost:0.20, diffRate=diffBoostRate=(maxStats-currStats)*.005, boostRate*(earnedScoreCopy/maxScore)
-    //15th April-15th July: Base: 0.40, Boost:0.16, diffRate=diffBoostRate=(maxStats-currStats)*.005, boostRate*(earnedScoreCopy/maxScore)
-    //15th July> 
-    //Base: 0.45, Boost:0.25, redRate=0.795, diffRate=(maxStats-currStats)*.04*(1+(2500-maxStats)*0.0004), acceleRate=boostRate*(earnedScoreCopy/maxScore)*(1+(2500-maxStats)*0.0004);
+    var baseRate=0.40, boostRate=.16, acceleRate, diffBoostRate;  //Change Base to 0.50 and Boost to 0.20 for previous numbers
     
     var earnedStas;
     var startingStats=(50+Math.floor((maxStats-50)/100)*25)
@@ -1201,8 +1122,8 @@ function calculate(currStats,maxStats,earnedScore=20,maxScore=50)
         }
     if(currStats < maxStats)
         {
-            diffBoostRate=(maxStats-currStats)*.004*(1+(2500-maxStats)*0.0004);
-            acceleRate=boostRate*(earnedScoreCopy/maxScore)*(1+(2500-maxStats)*0.0004);
+            diffBoostRate=(maxStats-currStats)/200
+            acceleRate=boostRate*(earnedScoreCopy/maxScore);
         }
     else
         {
@@ -1213,16 +1134,16 @@ function calculate(currStats,maxStats,earnedScore=20,maxScore=50)
         {
             if(currStats < maxStats)
                 {
-                    diffBoostRate=(maxStats-currStats)*.004*(1+(2500-maxStats)*0.0004);
-                    acceleRate=boostRate*(earnedScoreCopy/maxScore)*(1+(2500-maxStats)*0.0004);
+                    diffBoostRate=(maxStats-currStats)/200
+                    acceleRate=boostRate*(earnedScoreCopy/maxScore);
                 }
             else
                 {
                     diffBoostRate=0;
                     acceleRate=0;
                 }
-            currStats+=(baseRate + diffBoostRate + acceleRate)*redRate;
-            maxStats+=baseRate*redRate;
+            currStats+=(baseRate + diffBoostRate + acceleRate);
+            maxStats+=baseRate;
             if(currStats > maxStats)
                 {
                     currStats = maxStats;
@@ -1242,9 +1163,9 @@ function calculate(currStats,maxStats,earnedScore=20,maxScore=50)
         }
     currStats=Math.round(currStats);
     //maxStats=Math.floor(maxStats);
-    earnedStas=(currStats-currentStatsCopy);
+    earnedStas=currStats-currentStatsCopy;
     
-    returnVal.earnedStats=(currStats-currentStatsCopy)
+    returnVal.earnedStats=currStats-currentStatsCopy
     if((stm)&&(str)&&(spd)&&(dex)&&(will)&&(stm+str+spd+dex+will==currentStatsCopy))
         {
             returnVal.earnedSplit=`(${Math.round((currentStatsCopy+returnVal.earnedStats) * 0.6-(stm+str+spd))}/${Math.round((currentStatsCopy+returnVal.earnedStats) * 0.4-(dex+will))})`;
@@ -1283,13 +1204,9 @@ function WhenWillICatchUp(maxStats,startingStats=-1,score=50)
     if(startingStats==-1)
         {
             startingStats=(50+Math.floor((maxStats-50)/100)*25)
-        }
-    if(startingStats.toString().toLowerCase()=="reroll")
-        {
-            startingStats=Math.round(((50+Math.floor((maxStats-50)/100)*25)+maxStats)/2)
-        }
+        } 
     var res1, res2, res3, res4;
-    res1 = res2 = res3 = res4 = res5 = ""
+    res1 = res2 = res3 = res4 = ""
     while (startingStats<maxStats)
         {
             if((startingStats>=maxStats*.50)&&res1=="")
@@ -1300,24 +1217,20 @@ function WhenWillICatchUp(maxStats,startingStats=-1,score=50)
                 {
                     res2="75%: "+(maxStats-maxStatCopy)/20+" Forts | "+startingStats+" / "+maxStats+ "\n"
                 }
-            if((startingStats>=maxStats*.90)&&res3=="")
+            if((startingStats>=maxStats*.95)&&res3=="")
                 {
-                    res3="90%: "+(maxStats-maxStatCopy)/20+" Forts | "+startingStats+" / "+maxStats+ "\n"
-                }
-            if((startingStats>=maxStats*.95)&&res4=="")
-                {
-                    res4="95%: "+(maxStats-maxStatCopy)/20+" Forts | "+startingStats+" / "+maxStats+ "\n"
+                    res3="95%: "+(maxStats-maxStatCopy)/20+" Forts | "+startingStats+" / "+maxStats+ "\n"
                 }
             startingStats=calculate(startingStats,maxStats,score,50).newStats;
             maxStats=calculate(maxStats,maxStats,50,50).newStats;
             if(maxStats>2500)
                 {
-                    res5+="100%: >2500 Stats"
-                    return res1+res2+res3+res4+res5;
+                    res4+="100%: >2500 Stats"
+                    return res1+res2+res3+res4;
                 }
         }
-    res5+="100%: "+(maxStats-maxStatCopy)/20+" Forts | "+startingStats+" / "+maxStats+ "\n";
-    return res1+res2+res3+res4+res5;
+    res4+="100%: "+(maxStats-maxStatCopy)/20+" Forts | "+startingStats+" / "+maxStats+ "\n";
+    return res1+res2+res3+res4;
 }
 
 
@@ -1388,85 +1301,6 @@ function getFortResults(number=50)
         return;
     }
 }
-
-function queryAll(number=50)
-{
-    let eachResult
-    let sheetID = "11DBV69f-U9T1EXbdI_AvjHpp7XzSs38fH9eKqdx2sUw";
-    // JOEY'S SHEET FOR DEBUGGING
-    //let sheetID = "10bBzQNryutYgx49QEb2Vz19alL55lS_hEJ-FrJTOIFE";
-    var url = `https://spreadsheets.google.com/feeds/list/${sheetID}/1/public/full?alt=json`;
-
-    var request = new XMLHttpRequest();
-    
-    request.ontimeout = () => {
-        logError(statsErrorMsg, `Error - Timed Out while getting Fort Results. Please manually do so manually.`);
-    };
-
-    request.open('GET', url);
-    request.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-
-    request.timeout = 5000;
-
-    request.send();
-    
-    request.onreadystatechange = async function() {
-        if (request.readyState == XMLHttpRequest.DONE) {
-            if (request.status === 200) {
-                // Good response
-                let data = JSON.parse(request.response).feed.entry;
-                for(var i=0;i<number;i++)
-                    {
-                        url = `https://api.reddit.com/user/${data[i]["gsx$username"]["$t"]}/comments/.json`;
-                        request = new XMLHttpRequest();
-                        request.ontimeout = () => {
-                            logError(`Error - Timed Out while Querying`);
-                            return false;
-                        };
-                        
-                        request.open('GET', url);
-                        request.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-
-                        request.timeout = 5000;
-
-                        request.send();
-                        if (request.status!=200 || i!=number-1)
-                            {
-                                await sleep(10)
-                            }
-                        /*
-                        result[i]={
-                                    User: usernames[i],
-                                    Score: score.innerHTML,
-                                    Split: earnedSplit.innerHTML,
-                                    Reserve: earnedReserve.innerHTML,
-                                  }
-                        */
-                        
-                    }
-                return "Queried All";
-            }
-            else {
-                logError(maxErrorMsg, "Error Getting Usernames from Google");
-                return;
-            }
-        }
-    }
-
-    
-    request.onabort = function() {
-        logError(maxErrorMsg, "Get Fort Results Aborted");
-        calculateMaxStats();
-        return;
-    }
-
-    request.onerror = function() {
-        logError(maxErrorMsg, "Error Getting Usernames from Google");
-        console.log(`Error ${request.status}: ${request.statusText}`);
-        return;
-    }
-}
-
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
